@@ -1,8 +1,9 @@
 package sii
 
 type Block interface {
+	Class() string
+	Init(class, name string)
 	Name() string
-	Type() string
 }
 
 type Marshaler interface {
@@ -16,14 +17,18 @@ type Unmarshaler interface {
 type RawBlock struct {
 	Data []byte
 
-	blockName string
-	blockType string
+	blockName  string
+	blockClass string
 }
 
+func (r *RawBlock) Init(class, name string) {
+	r.blockClass = class
+	r.blockName = name
+}
 func (r RawBlock) MarshalSII() []byte { return r.Data }
 func (r RawBlock) Name() string       { return r.blockName }
-func (r RawBlock) Type() string       { return r.blockType }
-func (r *RawBlock) UnmarshalSII(blockName, blockType string, in []byte) error {
+func (r RawBlock) Class() string      { return r.blockClass }
+func (r *RawBlock) UnmarshalSII(in []byte) error {
 	r.Data = in
 	return nil
 }

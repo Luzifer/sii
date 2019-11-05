@@ -121,16 +121,11 @@ func WriteUnitFile(filename string, encrypt bool, data *Unit) error {
 	return errors.New("Not implemented")
 }
 
-func parseSIIPlainFile(r io.Reader) (*Unit, error) {
-	// FIXME: Implement this
-	return nil, errors.New("Not implemented")
-}
-
 func readFTHeader(f io.ReaderAt) ([]byte, error) {
 	var ftHeader = make([]byte, 4)
 	if n, err := f.ReadAt(ftHeader, 0); err != nil || n != 4 {
 		if err != nil {
-			err = errors.Errorf("Received %d / 4 byte header")
+			err = errors.Errorf("Received %d / 4 byte header", n)
 		}
 		return nil, errors.Wrap(err, "Unable to read 4-byte file header")
 	}
