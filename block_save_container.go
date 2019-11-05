@@ -7,7 +7,7 @@ func init() {
 type SaveContainer struct {
 	SaveName     string   `sii:"name"`
 	Time         int64    `sii:"time"`
-	FileTime     uint64   `sii:"file_time"`
+	FileTime     int64    `sii:"file_time"`
 	Version      int      `sii:"version"`
 	Dependencies []string `sii:"dependencies"`
 

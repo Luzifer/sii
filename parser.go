@@ -89,6 +89,9 @@ func parseSIIPlainFile(r io.Reader) (*Unit, error) {
 		case strings.HasSuffix(line, `*/`):
 			inComment = false
 
+		case strings.HasPrefix(line, `@include`):
+			return nil, errors.New("File uses includes (unsupported feature)")
+
 		default:
 			if inComment {
 				// Inside multi-line-comment, just drop
@@ -125,7 +128,7 @@ func processBlock(unit *Unit, blockClass, blockName string, blockContent []byte)
 	if reflect.TypeOf(block).Implements(reflect.TypeOf((*Unmarshaler)(nil)).Elem()) {
 		err = block.(Unmarshaler).UnmarshalSII(blockContent)
 	} else {
-		// TODO: Add generic unmarshal
+		err = genericUnmarshal(blockContent, block)
 	}
 
 	if err != nil {

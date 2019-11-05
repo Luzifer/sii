@@ -7,16 +7,8 @@ import (
 
 var testSii = `SiiNunit
 {
-/*
- * Multi-line comment
- */
 some_unit : .my_mod.unit
 {
-		// Single line comment
-		# Single line comment
-		/*
-		 * In-Block multi-line string
-		 */
     attribute_number: 40
     attribute_string: "TEST STRING"
     attribute_unit: test.unit
