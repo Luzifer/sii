@@ -1,6 +1,12 @@
 package sii
 
-import "strings"
+import (
+	"bytes"
+	"regexp"
+	"strings"
+
+	"github.com/pkg/errors"
+)
 
 // See https://modding.scssoft.com/wiki/Documentation/Engine/Units
 
@@ -10,12 +16,50 @@ import "strings"
 
 // float2-4 => [2]float - [4]float
 
-type Placement struct {
-	X, Y, Z       float64
-	W, X2, Y2, Z2 float64
+var placementRegexp = regexp.MustCompile(`^\(([0-9.]+|&[0-9a-f]+), ([0-9.]+|&[0-9a-f]+), ([0-9.]+|&[0-9a-f]+)\) \(([0-9.]+|&[0-9a-f]+); ([0-9.]+|&[0-9a-f]+), ([0-9.]+|&[0-9a-f]+), ([0-9.]+|&[0-9a-f]+)\)$`)
+
+// Placement contains 7 floats: (x, y, z) (w; x, y, z)
+type Placement [7]float32
+
+func (p Placement) MarshalSII() ([]byte, error) {
+	var siiFloats = [][]byte{}
+
+	for _, f := range p {
+		b, err := float2sii(f)
+		if err != nil {
+			return nil, errors.Wrap(err, "Unable to encode float")
+		}
+		siiFloats = append(siiFloats, b)
+	}
+
+	var buf = new(bytes.Buffer)
+
+	buf.Write([]byte("("))
+	bytes.Join(siiFloats[0:3], []byte(", "))
+	buf.Write([]byte(") ("))
+	buf.Write(siiFloats[3])
+	buf.Write([]byte("; "))
+	bytes.Join(siiFloats[4:7], []byte(", "))
+	buf.Write([]byte(")"))
+
+	return buf.Bytes(), nil
 }
 
-// TODO: Implement marshalling for Placement
+func (p *Placement) UnmarshalSII(in []byte) error {
+	if !placementRegexp.Match(in) {
+		return errors.New("Input data does not match expected format")
+	}
+
+	grps := placementRegexp.FindSubmatch(in)
+	var err error
+	for i := 0; i < 7; i++ {
+		if p[i], err = sii2float(grps[i+1]); err != nil {
+			return errors.Wrap(err, "Unable to decode float")
+		}
+	}
+
+	return nil
+}
 
 // fixed => native type int
 
@@ -38,8 +82,10 @@ type Ptr struct {
 	unit   *Unit
 }
 
-func (p Ptr) CanResolve() bool   { return strings.HasPrefix(p.Target, ".") }
+func (p Ptr) CanResolve() bool { return strings.HasPrefix(p.Target, ".") }
+
 func (p Ptr) MarshalSII() []byte { return []byte(p.Target) }
+
 func (p Ptr) Resolve() Block {
 	if p.Target == "null" {
 		return nil
@@ -52,6 +98,7 @@ func (p Ptr) Resolve() Block {
 	}
 	return nil
 }
+
 func (p *Ptr) UnmarshalSII(in []byte) error {
 	p.Target = string(in)
 	return nil
