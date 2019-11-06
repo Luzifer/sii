@@ -105,3 +105,18 @@ func (p *Ptr) UnmarshalSII(in []byte) error {
 }
 
 // resource_tie => native type string
+
+// RawValue is used in places where a key can has multiple types and
+// clean parsing into Go types is no longer possible. Sadly even parsing
+// into interface{} is not possible as even for that the type of the value
+// must be known
+type RawValue []byte
+
+func (r RawValue) MarshalSII() ([]byte, error) { return r, nil }
+
+func (r *RawValue) UnmarshalSII(in []byte) error {
+	*r = in
+	return nil
+}
+
+// TODO: Add converter functions from / to RawValue
