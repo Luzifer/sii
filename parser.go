@@ -55,6 +55,7 @@ func parseSIIPlainFile(r io.Reader) (*Unit, error) {
 
 				inBlock = false
 				blockClass = ""
+				blockContent = nil
 				blockName = ""
 				continue
 			}
