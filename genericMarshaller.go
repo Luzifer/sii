@@ -21,7 +21,7 @@ func genericMarshal(in interface{}) ([]byte, error) {
 	return nil, errors.New("Not implemented")
 }
 
-func genericUnmarshal(in []byte, out interface{}) error {
+func genericUnmarshal(in []byte, out interface{}, unit *Unit) error {
 	if reflect.TypeOf(out).Kind() != reflect.Ptr {
 		return errors.New("Calling parser with non-pointer")
 	}
@@ -45,7 +45,7 @@ func genericUnmarshal(in []byte, out interface{}) error {
 
 		case reflect.TypeOf(Ptr{}):
 			data := getSingleValue(in, attributeName)
-			v := Ptr{}
+			v := Ptr{unit: unit}
 			if err := v.UnmarshalSII(data); err != nil {
 				return errors.Wrapf(err, "Unable to parse Ptr for attribute %q", attributeName)
 			}
@@ -107,7 +107,7 @@ func genericUnmarshal(in []byte, out interface{}) error {
 			case reflect.TypeOf(Ptr{}):
 				var v []Ptr
 				for _, bv := range ba {
-					e := Ptr{}
+					e := Ptr{unit: unit}
 					if err := e.UnmarshalSII(bv); err != nil {
 						return errors.Wrapf(err, "Unable to parse Ptr for attribute %q", attributeName)
 					}

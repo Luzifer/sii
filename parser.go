@@ -129,7 +129,7 @@ func processBlock(unit *Unit, blockClass, blockName string, blockContent []byte)
 	if reflect.TypeOf(block).Implements(reflect.TypeOf((*Unmarshaler)(nil)).Elem()) {
 		err = block.(Unmarshaler).UnmarshalSII(blockContent)
 	} else {
-		err = genericUnmarshal(blockContent, block)
+		err = genericUnmarshal(blockContent, block, unit)
 	}
 
 	if err != nil {
