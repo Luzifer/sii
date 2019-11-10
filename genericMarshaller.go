@@ -79,7 +79,11 @@ func genericUnmarshal(in []byte, out interface{}, unit *Unit) error {
 			valField.Set(reflect.ValueOf(v))
 
 		case reflect.Int, reflect.Int64:
-			v, err := strconv.ParseInt(string(getSingleValue(in, attributeName)), 10, 64)
+			bv := getSingleValue(in, attributeName)
+			if isNilValue(bv) {
+				continue
+			}
+			v, err := strconv.ParseInt(string(bv), 10, 64)
 			if err != nil {
 				return errors.Wrapf(err, "Unable to parse int for attribute %q", attributeName)
 			}
@@ -121,7 +125,19 @@ func genericUnmarshal(in []byte, out interface{}, unit *Unit) error {
 				for _, bv := range ba {
 					e := Placement{}
 					if err := e.UnmarshalSII(bv); err != nil {
-						return errors.Wrapf(err, "Unable to parse Ptr for attribute %q", attributeName)
+						return errors.Wrapf(err, "Unable to parse Placement for attribute %q", attributeName)
+					}
+					v = append(v, e)
+				}
+				valField.Set(reflect.ValueOf(v))
+				continue
+
+			case reflect.TypeOf(RawValue{}):
+				var v []RawValue
+				for _, bv := range ba {
+					e := RawValue{}
+					if err := e.UnmarshalSII(bv); err != nil {
+						return errors.Wrapf(err, "Unable to parse RawValue for attribute %q", attributeName)
 					}
 					v = append(v, e)
 				}
@@ -228,4 +244,8 @@ func getArrayValues(in []byte, name string) ([][]byte, error) {
 	}
 
 	return out, nil
+}
+
+func isNilValue(in []byte) bool {
+	return reflect.DeepEqual(in, []byte("nil"))
 }
