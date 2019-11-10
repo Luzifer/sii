@@ -44,11 +44,19 @@ func genericUnmarshal(in []byte, out interface{}) error {
 		switch typeField.Type {
 
 		case reflect.TypeOf(Ptr{}):
-			// TODO: Implement
+			data := getSingleValue(in, attributeName)
+			v := Ptr{}
+			if err := v.UnmarshalSII(data); err != nil {
+				return errors.Wrapf(err, "Unable to parse Ptr for attribute %q", attributeName)
+			}
 			continue
 
 		case reflect.TypeOf(Placement{}):
-			// TODO: Implement
+			data := getSingleValue(in, attributeName)
+			v := Placement{}
+			if err := v.UnmarshalSII(data); err != nil {
+				return errors.Wrapf(err, "Unable to parse Placement for attribute %q", attributeName)
+			}
 			continue
 
 		}
