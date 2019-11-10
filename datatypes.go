@@ -3,7 +3,6 @@ package sii
 import (
 	"bytes"
 	"regexp"
-	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -81,8 +80,6 @@ type Ptr struct {
 	Target string
 	unit   *Unit
 }
-
-func (p Ptr) CanResolve() bool { return strings.HasPrefix(p.Target, ".") }
 
 func (p Ptr) MarshalSII() []byte { return []byte(p.Target) }
 
