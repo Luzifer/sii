@@ -32,7 +32,7 @@ type Player struct {
 	DrivingTime              int64       `sii:"driving_time"`
 	SleepingCount            int         `sii:"sleeping_count"`
 	FreeRoamDistance         int64       `sii:"free_roam_distance"`
-	DiscoveryDistance        float64     `sii:"discovary_distance"` // Typo is intended and copied from real save-game
+	DiscoveryDistance        float32     `sii:"discovary_distance"` // Typo is intended and copied from real save-game
 	DismissedDrivers         int         `sii:"dismissed_drivers"`
 	Trucks                   []Ptr       `sii:"trucks"`
 	TruckProfitLogs          []Ptr       `sii:"truck_profit_logs"`

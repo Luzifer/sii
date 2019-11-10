@@ -49,6 +49,7 @@ func genericUnmarshal(in []byte, out interface{}) error {
 			if err := v.UnmarshalSII(data); err != nil {
 				return errors.Wrapf(err, "Unable to parse Ptr for attribute %q", attributeName)
 			}
+			valField.Set(reflect.ValueOf(v))
 			continue
 
 		case reflect.TypeOf(Placement{}):
@@ -57,6 +58,7 @@ func genericUnmarshal(in []byte, out interface{}) error {
 			if err := v.UnmarshalSII(data); err != nil {
 				return errors.Wrapf(err, "Unable to parse Placement for attribute %q", attributeName)
 			}
+			valField.Set(reflect.ValueOf(v))
 			continue
 
 		}
@@ -69,12 +71,12 @@ func genericUnmarshal(in []byte, out interface{}) error {
 			}
 			valField.SetBool(v)
 
-		case reflect.Float64:
-			v, err := strconv.ParseFloat(string(getSingleValue(in, attributeName)), 64)
+		case reflect.Float32:
+			v, err := sii2float(getSingleValue(in, attributeName))
 			if err != nil {
 				return errors.Wrapf(err, "Unable to parse float for attribute %q", attributeName)
 			}
-			valField.SetFloat(v)
+			valField.Set(reflect.ValueOf(v))
 
 		case reflect.Int, reflect.Int64:
 			v, err := strconv.ParseInt(string(getSingleValue(in, attributeName)), 10, 64)
@@ -100,6 +102,34 @@ func genericUnmarshal(in []byte, out interface{}) error {
 				return errors.Wrapf(err, "Unable to fetch array values for attribute %q", attributeName)
 			}
 
+			switch typeField.Type.Elem() {
+
+			case reflect.TypeOf(Ptr{}):
+				var v []Ptr
+				for _, bv := range ba {
+					e := Ptr{}
+					if err := e.UnmarshalSII(bv); err != nil {
+						return errors.Wrapf(err, "Unable to parse Ptr for attribute %q", attributeName)
+					}
+					v = append(v, e)
+				}
+				valField.Set(reflect.ValueOf(v))
+				continue
+
+			case reflect.TypeOf(Placement{}):
+				var v []Placement
+				for _, bv := range ba {
+					e := Placement{}
+					if err := e.UnmarshalSII(bv); err != nil {
+						return errors.Wrapf(err, "Unable to parse Ptr for attribute %q", attributeName)
+					}
+					v = append(v, e)
+				}
+				valField.Set(reflect.ValueOf(v))
+				continue
+
+			}
+
 			switch typeField.Type.Elem().Kind() {
 			case reflect.Bool:
 				var v []bool
@@ -116,6 +146,17 @@ func genericUnmarshal(in []byte, out interface{}) error {
 				var v []int
 				for _, bv := range ba {
 					pbv, err := strconv.Atoi(string(bv))
+					if err != nil {
+						return errors.Wrapf(err, "Unable to parse int for attribute %q", attributeName)
+					}
+					v = append(v, pbv)
+				}
+				valField.Set(reflect.ValueOf(v))
+
+			case reflect.Int64:
+				var v []int64
+				for _, bv := range ba {
+					pbv, err := strconv.ParseInt(string(bv), 10, 64)
 					if err != nil {
 						return errors.Wrapf(err, "Unable to parse int for attribute %q", attributeName)
 					}
