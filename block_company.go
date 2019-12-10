@@ -11,7 +11,7 @@ type Company struct {
 	JobOffer            []Ptr   `sii:"job_offer"`
 	CargoOfferSeeds     []int64 `sii:"cargo_offer_seeds"`
 	Discovered          bool    `sii:"discovered"`
-	ReservedTrailerSlot int64   `sii:"reserved_trailer_slot"` // TODO: Maybe wrong type, haven't seen other than "nil"
+	ReservedTrailerSlot Ptr     `sii:"reserved_trailer_slot"` // TODO: Maybe wrong type, haven't seen other than "nil"
 
 	blockName string
 }

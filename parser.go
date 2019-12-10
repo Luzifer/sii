@@ -49,7 +49,7 @@ func parseSIIPlainFile(r io.Reader) (*Unit, error) {
 
 		case line == "}":
 			if inBlock {
-				if err := processBlock(unit, blockClass, blockName, blockContent); err != nil {
+				if err := processBlock(unit, blockClass, blockName, bytes.Trim(blockContent, "\n")); err != nil {
 					return nil, errors.Wrap(err, "Unable to process block")
 				}
 

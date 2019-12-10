@@ -5,7 +5,7 @@ func init() {
 }
 
 type Player struct {
-	HQCity                   string      `sii:"hq_city"`
+	HQCity                   Ptr         `sii:"hq_city"`
 	Trailers                 []Ptr       `sii:"trailers"`
 	TrailerUtilizationLogs   []Ptr       `sii:"trailer_utilization_logs"`
 	TrailerDefs              []Ptr       `sii:"trailer_defs"`

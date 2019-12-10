@@ -21,24 +21,24 @@ var placementRegexp = regexp.MustCompile(`^\(([0-9.]+|&[0-9a-f]+), ([0-9.]+|&[0-
 type Placement [7]float32
 
 func (p Placement) MarshalSII() ([]byte, error) {
-	var siiFloats = [][]byte{}
+	var siiFloats = make([][]byte, 7)
 
-	for _, f := range p {
+	for i, f := range p {
 		b, err := float2sii(f)
 		if err != nil {
 			return nil, errors.Wrap(err, "Unable to encode float")
 		}
-		siiFloats = append(siiFloats, b)
+		siiFloats[i] = b
 	}
 
 	var buf = new(bytes.Buffer)
 
 	buf.Write([]byte("("))
-	bytes.Join(siiFloats[0:3], []byte(", "))
+	buf.Write(bytes.Join(siiFloats[0:3], []byte(", ")))
 	buf.Write([]byte(") ("))
 	buf.Write(siiFloats[3])
 	buf.Write([]byte("; "))
-	bytes.Join(siiFloats[4:7], []byte(", "))
+	buf.Write(bytes.Join(siiFloats[4:7], []byte(", ")))
 	buf.Write([]byte(")"))
 
 	return buf.Bytes(), nil

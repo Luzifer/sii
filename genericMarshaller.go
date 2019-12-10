@@ -1,36 +1,26 @@
 package sii
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
 	"reflect"
-	"regexp"
 	"strconv"
-	"strings"
 
 	"github.com/pkg/errors"
 )
 
-var (
-	singleLineValue = `^\s*%s\s?:\s?(.+)$`
-	arrayLineValue  = `^\s*%s(\[([0-9]*)\])?\s?:\s?(.+)$`
-)
-
 func genericMarshal(in interface{}) ([]byte, error) {
-	return nil, errors.New("Not implemented")
-}
-
-func genericUnmarshal(in []byte, out interface{}, unit *Unit) error {
-	if reflect.TypeOf(out).Kind() != reflect.Ptr {
-		return errors.New("Calling parser with non-pointer")
+	if reflect.TypeOf(in).Kind() == reflect.Ptr {
+		in = reflect.ValueOf(in).Elem().Interface()
 	}
 
-	if reflect.ValueOf(out).Elem().Kind() != reflect.Struct {
-		return errors.New("Calling parser with pointer to non-struct")
+	if reflect.TypeOf(in).Kind() != reflect.Struct {
+		return nil, errors.New("Calling marshaller with non-struct")
 	}
 
-	st := reflect.ValueOf(out).Elem()
+	var buf = new(bytes.Buffer)
+
+	st := reflect.ValueOf(in)
 	for i := 0; i < st.NumField(); i++ {
 		valField := st.Field(i)
 		typeField := st.Type().Field(i)
@@ -44,208 +34,146 @@ func genericUnmarshal(in []byte, out interface{}, unit *Unit) error {
 		switch typeField.Type {
 
 		case reflect.TypeOf(Ptr{}):
-			data := getSingleValue(in, attributeName)
-			v := Ptr{unit: unit}
-			if err := v.UnmarshalSII(data); err != nil {
-				return errors.Wrapf(err, "Unable to parse Ptr for attribute %q", attributeName)
-			}
-			valField.Set(reflect.ValueOf(v))
+			v := valField.Interface().(Ptr).MarshalSII()
+			buf.WriteString(fmt.Sprintf(" %s: %s\n", attributeName, v))
 			continue
 
 		case reflect.TypeOf(Placement{}):
-			data := getSingleValue(in, attributeName)
-			v := Placement{}
-			if err := v.UnmarshalSII(data); err != nil {
-				return errors.Wrapf(err, "Unable to parse Placement for attribute %q", attributeName)
+			v, err := valField.Interface().(Placement).MarshalSII()
+			if err != nil {
+				return nil, errors.Wrap(err, "Unable to encode Placement")
 			}
-			valField.Set(reflect.ValueOf(v))
+			buf.WriteString(fmt.Sprintf(" %s: %s\n", attributeName, v))
 			continue
 
 		}
 
 		switch typeField.Type.Kind() {
+
 		case reflect.Bool:
-			v, err := strconv.ParseBool(string(getSingleValue(in, attributeName)))
-			if err != nil {
-				return errors.Wrapf(err, "Unable to parse boolean for attribute %q", attributeName)
-			}
-			valField.SetBool(v)
+			v := valField.Bool()
+			buf.WriteString(fmt.Sprintf(" %s: %s\n", attributeName, strconv.FormatBool(v)))
 
 		case reflect.Float32:
-			v, err := sii2float(getSingleValue(in, attributeName))
+			v, err := float2sii(float32(valField.Float()))
 			if err != nil {
-				return errors.Wrapf(err, "Unable to parse float for attribute %q", attributeName)
+				return nil, errors.Wrap(err, "Unable to encode float32")
 			}
-			valField.Set(reflect.ValueOf(v))
+			buf.WriteString(fmt.Sprintf(" %s: %s\n", attributeName, v))
 
 		case reflect.Int, reflect.Int64:
-			bv := getSingleValue(in, attributeName)
-			if isNilValue(bv) {
-				continue
-			}
-			v, err := strconv.ParseInt(string(bv), 10, 64)
-			if err != nil {
-				return errors.Wrapf(err, "Unable to parse int for attribute %q", attributeName)
-			}
-			valField.SetInt(v)
+			buf.WriteString(fmt.Sprintf(" %s: %d\n", attributeName, valField.Int()))
 
 		case reflect.String:
-			v := strings.Trim(string(getSingleValue(in, attributeName)), `"`)
-			valField.SetString(v)
+			buf.WriteString(fmt.Sprintf(" %s: %q\n", attributeName, valField.String()))
 
 		case reflect.Uint64:
-			v, err := strconv.ParseUint(string(getSingleValue(in, attributeName)), 10, 64)
-			if err != nil {
-				return errors.Wrapf(err, "Unable to parse uint for attribute %q", attributeName)
+			v := strconv.FormatUint(valField.Uint(), 10)
+			buf.WriteString(fmt.Sprintf(" %s: %s\n", attributeName, v))
+
+		case reflect.Ptr:
+
+			switch typeField.Type.Elem().Kind() {
+
+			case reflect.Int64:
+				var v string
+				if valField.IsNil() {
+					v = "nil"
+				} else {
+					v = strconv.FormatInt(valField.Elem().Int(), 10)
+				}
+				buf.WriteString(fmt.Sprintf(" %s: %s\n", attributeName, v))
+
+			default:
+				return nil, errors.Errorf("Unsupported type: *%s", typeField.Type.Elem().Kind())
+
 			}
-			valField.SetUint(v)
 
 		case reflect.Slice:
-			ba, err := getArrayValues(in, attributeName)
-			if err != nil {
-				return errors.Wrapf(err, "Unable to fetch array values for attribute %q", attributeName)
-			}
+			var values []string
 
 			switch typeField.Type.Elem() {
 
 			case reflect.TypeOf(Ptr{}):
-				var v []Ptr
-				for _, bv := range ba {
-					e := Ptr{unit: unit}
-					if err := e.UnmarshalSII(bv); err != nil {
-						return errors.Wrapf(err, "Unable to parse Ptr for attribute %q", attributeName)
-					}
-					v = append(v, e)
+				for _, val := range valField.Interface().([]Ptr) {
+					values = append(values, string(val.MarshalSII()))
 				}
-				valField.Set(reflect.ValueOf(v))
+				buf.Write(encodeSliceValue(attributeName, values))
 				continue
 
 			case reflect.TypeOf(Placement{}):
-				var v []Placement
-				for _, bv := range ba {
-					e := Placement{}
-					if err := e.UnmarshalSII(bv); err != nil {
-						return errors.Wrapf(err, "Unable to parse Placement for attribute %q", attributeName)
+				for _, val := range valField.Interface().([]Placement) {
+					ev, err := val.MarshalSII()
+					if err != nil {
+						return nil, errors.Wrap(err, "Unable to encode Placement")
 					}
-					v = append(v, e)
+					values = append(values, string(ev))
 				}
-				valField.Set(reflect.ValueOf(v))
+				buf.Write(encodeSliceValue(attributeName, values))
 				continue
 
 			case reflect.TypeOf(RawValue{}):
-				var v []RawValue
-				for _, bv := range ba {
-					e := RawValue{}
-					if err := e.UnmarshalSII(bv); err != nil {
-						return errors.Wrapf(err, "Unable to parse RawValue for attribute %q", attributeName)
+				for _, val := range valField.Interface().([]RawValue) {
+					ev, err := val.MarshalSII()
+					if err != nil {
+						return nil, errors.Wrap(err, "Unable to encode RawValue")
 					}
-					v = append(v, e)
+					values = append(values, string(ev))
 				}
-				valField.Set(reflect.ValueOf(v))
+				buf.Write(encodeSliceValue(attributeName, values))
 				continue
 
 			}
 
 			switch typeField.Type.Elem().Kind() {
+
 			case reflect.Bool:
-				var v []bool
-				for _, bv := range ba {
-					pbv, err := strconv.ParseBool(string(bv))
-					if err != nil {
-						return errors.Wrapf(err, "Unable to parse boolean for attribute %q", attributeName)
-					}
-					v = append(v, pbv)
+				for _, val := range valField.Interface().([]bool) {
+					values = append(values, strconv.FormatBool(val))
 				}
-				valField.Set(reflect.ValueOf(v))
+				buf.Write(encodeSliceValue(attributeName, values))
 
 			case reflect.Int:
-				var v []int
-				for _, bv := range ba {
-					pbv, err := strconv.Atoi(string(bv))
-					if err != nil {
-						return errors.Wrapf(err, "Unable to parse int for attribute %q", attributeName)
-					}
-					v = append(v, pbv)
+				for _, val := range valField.Interface().([]int) {
+					values = append(values, strconv.FormatInt(int64(val), 10))
 				}
-				valField.Set(reflect.ValueOf(v))
+				buf.Write(encodeSliceValue(attributeName, values))
 
 			case reflect.Int64:
-				var v []int64
-				for _, bv := range ba {
-					pbv, err := strconv.ParseInt(string(bv), 10, 64)
-					if err != nil {
-						return errors.Wrapf(err, "Unable to parse int for attribute %q", attributeName)
-					}
-					v = append(v, pbv)
+				for _, val := range valField.Interface().([]int64) {
+					values = append(values, strconv.FormatInt(val, 10))
 				}
-				valField.Set(reflect.ValueOf(v))
+				buf.Write(encodeSliceValue(attributeName, values))
 
 			case reflect.String:
-				var v []string
-				for _, bv := range ba {
-					v = append(v, strings.Trim(string(bv), `"`))
+				for _, val := range valField.Interface().([]string) {
+					values = append(values, val)
 				}
-				valField.Set(reflect.ValueOf(v))
+				buf.Write(encodeSliceValue(attributeName, values))
 
 			default:
-				return errors.Errorf("Unsupported type: []%s", typeField.Type.Elem().Kind())
+				return nil, errors.Errorf("Unsupported type: []%s", typeField.Type.Elem().Kind())
+
 			}
 
 		default:
-			return errors.Errorf("Unsupported type: %s", typeField.Type.Kind())
+			return nil, errors.Errorf("Unsupported type: %s", typeField.Type.Kind())
+
 		}
+
 	}
 
-	return nil
+	return buf.Bytes(), nil
 }
 
-func getSingleValue(in []byte, name string) []byte {
-	rex := regexp.MustCompile(fmt.Sprintf(singleLineValue, name))
+func encodeSliceValue(attributeName string, values []string) []byte {
+	var buf = new(bytes.Buffer)
 
-	var scanner = bufio.NewScanner(bytes.NewReader(in))
-	for scanner.Scan() {
-		if rex.Match(scanner.Bytes()) {
-			grp := rex.FindSubmatch(scanner.Bytes())
-			return grp[1]
-		}
-	}
-	return nil
-}
+	fmt.Fprintf(buf, " %s: %d\n", attributeName, len(values))
 
-func getArrayValues(in []byte, name string) ([][]byte, error) {
-	rex := regexp.MustCompile(fmt.Sprintf(arrayLineValue, name))
-	var out [][]byte
-
-	var scanner = bufio.NewScanner(bytes.NewReader(in))
-	for scanner.Scan() {
-		if rex.Match(scanner.Bytes()) {
-			grp := rex.FindSubmatch(scanner.Bytes())
-			if len(grp[1]) == 0 {
-				arrayLen, err := strconv.Atoi(string(grp[3]))
-				if err != nil {
-					return nil, errors.Wrap(err, "Unable to parse array capacity")
-				}
-				out = make([][]byte, arrayLen)
-				continue
-			}
-
-			if len(grp[2]) == 0 {
-				out = append(out, grp[3])
-				continue
-			}
-
-			idx, err := strconv.Atoi(string(grp[2]))
-			if err != nil {
-				return nil, errors.Wrap(err, "Unable to parse array index")
-			}
-
-			out[idx] = grp[3]
-		}
+	for i, v := range values {
+		fmt.Fprintf(buf, " %s[%d]: %s\n", attributeName, i, v)
 	}
 
-	return out, nil
-}
-
-func isNilValue(in []byte) bool {
-	return reflect.DeepEqual(in, []byte("nil"))
+	return buf.Bytes()
 }

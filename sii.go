@@ -117,8 +117,23 @@ func WriteUnitFile(filename string, encrypt bool, data *Unit) error {
 		return ErrNoEncryptionKeySet
 	}
 
-	// FIXME: Implement this
-	return errors.New("Not implemented")
+	var buf = new(bytes.Buffer)
+
+	if err := writeSIIPlainFile(data, buf); err != nil {
+		return errors.Wrap(err, "Unable to create SII file content")
+	}
+
+	// FIXME: Implement encryption
+
+	// Create output file
+	f, err := os.Create(filename)
+	if err != nil {
+		return errors.Wrap(err, "Unable to open output file")
+	}
+	defer f.Close()
+
+	_, err = buf.WriteTo(f)
+	return errors.Wrap(err, "Unable to write buffer")
 }
 
 func readFTHeader(f io.ReaderAt) ([]byte, error) {

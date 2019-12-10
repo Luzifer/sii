@@ -25,9 +25,9 @@ func (r *RawBlock) Init(class, name string) {
 	r.blockClass = class
 	r.blockName = name
 }
-func (r RawBlock) MarshalSII() []byte { return r.Data }
-func (r RawBlock) Name() string       { return r.blockName }
-func (r RawBlock) Class() string      { return r.blockClass }
+func (r RawBlock) MarshalSII() ([]byte, error) { return r.Data, nil }
+func (r RawBlock) Name() string                { return r.blockName }
+func (r RawBlock) Class() string               { return r.blockClass }
 func (r *RawBlock) UnmarshalSII(in []byte) error {
 	r.Data = in
 	return nil

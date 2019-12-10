@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/hex"
+	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -14,6 +16,10 @@ func float2sii(f float32) ([]byte, error) {
 		buf = new(bytes.Buffer)
 		err error
 	)
+
+	if math.Floor(float64(f)) == float64(f) {
+		return []byte(fmt.Sprintf("%.0f", f)), nil
+	}
 
 	err = binary.Write(buf, binary.BigEndian, f)
 	if err != nil {
