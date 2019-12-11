@@ -157,7 +157,7 @@ func genericMarshal(in interface{}) ([]byte, error) {
 
 			case reflect.String:
 				for _, val := range valField.Interface().([]string) {
-					values = append(values, val)
+					values = append(values, fmt.Sprintf("%q", val))
 				}
 				buf.Write(encodeSliceValue(attributeName, values))
 
