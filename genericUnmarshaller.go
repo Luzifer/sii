@@ -173,6 +173,17 @@ func genericUnmarshal(in []byte, out interface{}, unit *Unit) error {
 				}
 				valField.Set(reflect.ValueOf(v))
 
+			case reflect.Float32:
+				var v []float32
+				for _, bv := range ba {
+					pbv, err := sii2float(bv)
+					if err != nil {
+						return errors.Wrapf(err, "Unable to parse float32 for attribute %q", attributeName)
+					}
+					v = append(v, pbv)
+				}
+				valField.Set(reflect.ValueOf(v))
+
 			case reflect.Int:
 				var v []int
 				for _, bv := range ba {

@@ -17,7 +17,7 @@ func float2sii(f float32) ([]byte, error) {
 		err error
 	)
 
-	if math.Floor(float64(f)) == float64(f) {
+	if math.Floor(float64(f)) == float64(f) && f < 1000 {
 		return []byte(fmt.Sprintf("%.0f", f)), nil
 	}
 

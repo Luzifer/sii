@@ -133,6 +133,16 @@ func genericMarshal(in interface{}) ([]byte, error) {
 				}
 				buf.Write(encodeSliceValue(attributeName, values))
 
+			case reflect.Float32:
+				for _, val := range valField.Interface().([]float32) {
+					v, err := float2sii(val)
+					if err != nil {
+						return nil, errors.Wrap(err, "Unable to encode float32")
+					}
+					values = append(values, string(v))
+				}
+				buf.Write(encodeSliceValue(attributeName, values))
+
 			case reflect.Int:
 				for _, val := range valField.Interface().([]int) {
 					values = append(values, strconv.FormatInt(int64(val), 10))
