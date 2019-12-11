@@ -113,7 +113,7 @@ func genericUnmarshal(in []byte, out interface{}, unit *Unit) error {
 				switch typeField.Type.Len() {
 
 				case 3:
-					grps := regexp.MustCompile(`^\(([0-9.]+|&[0-9a-f]+), ([0-9.]+|&[0-9a-f]+), ([0-9.]+|&[0-9a-f]+)\)$`).
+					grps := regexp.MustCompile(`^\(([0-9.-]+|&[0-9a-f]+), ([0-9.-]+|&[0-9a-f]+), ([0-9.-]+|&[0-9a-f]+)\)$`).
 						FindSubmatch(getSingleValue(in, attributeName))
 					var v [3]float32
 

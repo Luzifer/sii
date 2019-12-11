@@ -15,7 +15,7 @@ import (
 
 // float2-4 => [2]float - [4]float
 
-var placementRegexp = regexp.MustCompile(`^\(([0-9.]+|&[0-9a-f]+), ([0-9.]+|&[0-9a-f]+), ([0-9.]+|&[0-9a-f]+)\) \(([0-9.]+|&[0-9a-f]+); ([0-9.]+|&[0-9a-f]+), ([0-9.]+|&[0-9a-f]+), ([0-9.]+|&[0-9a-f]+)\)$`)
+var placementRegexp = regexp.MustCompile(`^\(([0-9.-]+|&[0-9a-f]+), ([0-9.-]+|&[0-9a-f]+), ([0-9.-]+|&[0-9a-f]+)\) \(([0-9.-]+|&[0-9a-f]+); ([0-9.-]+|&[0-9a-f]+), ([0-9.-]+|&[0-9a-f]+), ([0-9.-]+|&[0-9a-f]+)\)$`)
 
 // Placement contains 7 floats: (x, y, z) (w; x, y, z)
 type Placement [7]float32
