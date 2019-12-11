@@ -112,18 +112,16 @@ func ReadUnitFile(filename string) (*Unit, error) {
 // The key is not included for legal reasons and you need to obtain it from other sources.
 func SetEncryptionKey(key []byte) { encryptionKey = key }
 
-func WriteUnitFile(filename string, encrypt bool, data *Unit) error {
-	if encrypt && encryptionKey == nil {
-		return ErrNoEncryptionKeySet
-	}
+// WriteUnitFile stores the unit into a file
+func WriteUnitFile(filename string, data *Unit) error {
+	var (
+		buf = new(bytes.Buffer)
+		err error
+	)
 
-	var buf = new(bytes.Buffer)
-
-	if err := writeSIIPlainFile(data, buf); err != nil {
+	if err = writeSIIPlainFile(data, buf); err != nil {
 		return errors.Wrap(err, "Unable to create SII file content")
 	}
-
-	// FIXME: Implement encryption
 
 	// Create output file
 	f, err := os.Create(filename)
