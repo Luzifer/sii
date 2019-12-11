@@ -199,6 +199,51 @@ func genericMarshal(in interface{}) ([]byte, error) {
 				}
 				buf.Write(encodeSliceValue(attributeName, values))
 
+			case reflect.Array:
+
+				switch typeField.Type.Elem().Elem().Kind() {
+
+				case reflect.Float32:
+					switch typeField.Type.Elem().Len() {
+
+					case 3:
+						for _, val := range valField.Interface().([][3]float32) {
+							var vals [][]byte
+							for _, v := range val {
+								bv, err := float2sii(v)
+								if err != nil {
+									return nil, errors.Wrap(err, "Unable to encode float32")
+								}
+								vals = append(vals, bv)
+							}
+							values = append(values, fmt.Sprintf("(%s)", bytes.Join(vals, []byte(", "))))
+						}
+
+					case 4:
+						for _, val := range valField.Interface().([][4]float32) {
+							var vals [][]byte
+							for _, v := range val {
+								bv, err := float2sii(v)
+								if err != nil {
+									return nil, errors.Wrap(err, "Unable to encode float32")
+								}
+								vals = append(vals, bv)
+							}
+							values = append(values, fmt.Sprintf("(%s; %s)", vals[0], bytes.Join(vals[1:], []byte(", "))))
+						}
+
+					default:
+						return nil, errors.Errorf("Unsupported len of type: [][%d]%s", typeField.Type.Elem().Len(), typeField.Type.Elem().Elem().Kind())
+
+					}
+
+				default:
+					return nil, errors.Errorf("Unsupported type: [][%d]%s", typeField.Type.Elem().Len(), typeField.Type.Elem().Elem().Kind())
+
+				}
+
+				buf.Write(encodeSliceValue(attributeName, values))
+
 			default:
 				return nil, errors.Errorf("Unsupported type: []%s", typeField.Type.Elem().Kind())
 

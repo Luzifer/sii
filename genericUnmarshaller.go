@@ -253,6 +253,59 @@ func genericUnmarshal(in []byte, out interface{}, unit *Unit) error {
 				}
 				valField.Set(reflect.ValueOf(v))
 
+			case reflect.Array:
+
+				switch typeField.Type.Elem().Elem().Kind() {
+
+				case reflect.Float32:
+					switch typeField.Type.Elem().Len() {
+
+					case 3:
+						var v [][3]float32
+						for _, bv := range ba {
+							grps := regexp.MustCompile(`^\(([0-9.-]+|&[0-9a-f]+), ([0-9.-]+|&[0-9a-f]+), ([0-9.-]+|&[0-9a-f]+)\)$`).
+								FindSubmatch(bv)
+							var sv [3]float32
+
+							for i := range sv {
+								val, err := sii2float(grps[i+1][:])
+								if err != nil {
+									return errors.Wrapf(err, "Unable to parse float32 for attribute %q", attributeName)
+								}
+								sv[i] = val
+							}
+							v = append(v, sv)
+						}
+						valField.Set(reflect.ValueOf(v))
+
+					case 4:
+						var v [][4]float32
+						for _, bv := range ba {
+							grps := regexp.MustCompile(`^\(([0-9.-]+|&[0-9a-f]+); ([0-9.-]+|&[0-9a-f]+), ([0-9.-]+|&[0-9a-f]+), ([0-9.-]+|&[0-9a-f]+)\)$`).
+								FindSubmatch(bv)
+							var sv [4]float32
+
+							for i := range sv {
+								val, err := sii2float(grps[i+1][:])
+								if err != nil {
+									return errors.Wrapf(err, "Unable to parse float32 for attribute %q", attributeName)
+								}
+								sv[i] = val
+							}
+							v = append(v, sv)
+						}
+						valField.Set(reflect.ValueOf(v))
+
+					default:
+						return errors.Errorf("Unsupported len of type: [][%d]%s", typeField.Type.Elem().Len(), typeField.Type.Elem().Elem().Kind())
+
+					}
+
+				default:
+					return errors.Errorf("Unsupported type: [][%d]%s", typeField.Type.Elem().Len(), typeField.Type.Elem().Elem().Kind())
+
+				}
+
 			default:
 				return errors.Errorf("Unsupported type: []%s", typeField.Type.Elem().Kind())
 			}
