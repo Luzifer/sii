@@ -46,6 +46,14 @@ func genericMarshal(in interface{}) ([]byte, error) {
 			buf.WriteString(fmt.Sprintf(" %s: %s\n", attributeName, v))
 			continue
 
+		case reflect.TypeOf(RawValue{}):
+			v, err := valField.Interface().(RawValue).MarshalSII()
+			if err != nil {
+				return nil, errors.Wrap(err, "Unable to encode RawValue")
+			}
+			buf.WriteString(fmt.Sprintf(" %s: %s\n", attributeName, v))
+			continue
+
 		}
 
 		switch typeField.Type.Kind() {
@@ -70,6 +78,36 @@ func genericMarshal(in interface{}) ([]byte, error) {
 		case reflect.Uint64:
 			v := strconv.FormatUint(valField.Uint(), 10)
 			buf.WriteString(fmt.Sprintf(" %s: %s\n", attributeName, v))
+
+		case reflect.Array:
+
+			switch typeField.Type.Elem().Kind() {
+
+			case reflect.Float32:
+				var vals [][]byte
+
+				switch typeField.Type.Len() {
+
+				case 3:
+					for _, v := range valField.Interface().([3]float32) {
+						bv, err := float2sii(v)
+						if err != nil {
+							return nil, errors.Wrap(err, "Unable to encode float32")
+						}
+						vals = append(vals, bv)
+					}
+
+				default:
+					return nil, errors.Errorf("Unsupported type: [%d]%s", typeField.Type.Len(), typeField.Type.Elem().Kind())
+
+				}
+
+				buf.WriteString(fmt.Sprintf(" %s: (%s)\n", attributeName, bytes.Join(vals, []byte(", "))))
+
+			default:
+				return nil, errors.Errorf("Unsupported type: [%d]%s", typeField.Type.Len(), typeField.Type.Elem().Kind())
+
+			}
 
 		case reflect.Ptr:
 

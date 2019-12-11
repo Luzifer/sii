@@ -57,6 +57,15 @@ func genericUnmarshal(in []byte, out interface{}, unit *Unit) error {
 			valField.Set(reflect.ValueOf(v))
 			continue
 
+		case reflect.TypeOf(RawValue{}):
+			data := getSingleValue(in, attributeName)
+			v := RawValue{}
+			if err := v.UnmarshalSII(data); err != nil {
+				return errors.Wrapf(err, "Unable to parse RawValue for attribute %q", attributeName)
+			}
+			valField.Set(reflect.ValueOf(v))
+			continue
+
 		}
 
 		switch typeField.Type.Kind() {
@@ -95,6 +104,37 @@ func genericUnmarshal(in []byte, out interface{}, unit *Unit) error {
 				return errors.Wrapf(err, "Unable to parse uint for attribute %q", attributeName)
 			}
 			valField.SetUint(v)
+
+		case reflect.Array:
+
+			switch typeField.Type.Elem().Kind() {
+
+			case reflect.Float32:
+				switch typeField.Type.Len() {
+
+				case 3:
+					grps := regexp.MustCompile(`^\(([0-9.]+|&[0-9a-f]+), ([0-9.]+|&[0-9a-f]+), ([0-9.]+|&[0-9a-f]+)\)$`).
+						FindSubmatch(getSingleValue(in, attributeName))
+					var v [3]float32
+
+					for i := range v {
+						val, err := sii2float(grps[i+1][:])
+						if err != nil {
+							return errors.Wrapf(err, "Unable to parse float32 for attribute %q", attributeName)
+						}
+						v[i] = val
+					}
+					valField.Set(reflect.ValueOf(v))
+
+				default:
+					return errors.Errorf("Unsupported type: [%d]%s", typeField.Type.Len(), typeField.Type.Elem().Kind())
+
+				}
+
+			default:
+				return errors.Errorf("Unsupported type: [%d]%s", typeField.Type.Len(), typeField.Type.Elem().Kind())
+
+			}
 
 		case reflect.Ptr:
 
