@@ -6,7 +6,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -49,7 +48,7 @@ func handleGetProfileSaves(w http.ResponseWriter, r *http.Request) {
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		apiGenericError(w, http.StatusInternalServerError, errors.Wrap(err, "Unable to open websocket"))
+		log.WithError(err).Debug("Unable to open websocket")
 		return
 	}
 	defer conn.Close()
