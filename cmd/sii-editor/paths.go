@@ -43,3 +43,19 @@ func findGamePath() (string, error) {
 
 	return "", errPathNotFound
 }
+
+func getProfilePath(profile string) string {
+	return path.Join(userConfig.ProfileDirectory, profile)
+}
+
+func getProfileInfoPath(profile string) string {
+	return path.Join(getProfilePath(profile), "profile.sii")
+}
+
+func getSavePath(profile, save string) string {
+	return path.Join(getProfilePath(profile), "save", save)
+}
+
+func getSaveFilePath(profile, save, file string) string {
+	return path.Join(getSavePath(profile, save), file)
+}

@@ -59,7 +59,7 @@ func listSaves(profile string) (map[string]commSaveInfo, error) {
 			continue
 		}
 
-		var sFile = path.Join(userConfig.ProfileDirectory, profile, "save", entry.Name(), "info.sii")
+		var sFile = getSaveFilePath(profile, entry.Name(), "info.sii")
 		if _, err := os.Stat(sFile); err != nil {
 			// That directory contains no profile.sii - Weird but okay
 			log.WithFields(log.Fields{
@@ -99,7 +99,7 @@ func listProfiles() (map[string]commProfileInfo, error) {
 			continue
 		}
 
-		var pFile = path.Join(userConfig.ProfileDirectory, entry.Name(), "profile.sii")
+		var pFile = getProfileInfoPath(entry.Name())
 		if _, err := os.Stat(pFile); err != nil {
 			// That directory contains no profile.sii - Weird but okay
 			log.WithField("profile", entry.Name()).Debug("Found profile directory without profile.sii")
