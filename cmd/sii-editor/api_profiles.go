@@ -10,6 +10,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const savePollTime = 10 * time.Second
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -57,7 +59,7 @@ func handleGetProfileSaves(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for {
+	for t := time.NewTicker(savePollTime); ; <-t.C {
 		profiles, err := listProfiles()
 		if err != nil {
 			log.WithError(err).Error("Unable to list profiles during socket")
