@@ -4,6 +4,7 @@ import "net/http"
 
 func init() {
 	router.HandleFunc("/api/profiles/{profileID}/saves/{saveName}", handleGetSaveInfo).Methods(http.MethodGet)
+	router.HandleFunc("/api/profiles/{profileID}/saves/{saveName}/economy/{type}", handleUpdateSaveInfo).Methods(http.MethodPut)
 	router.HandleFunc("/api/profiles/{profileID}/saves/{saveName}/fix", handleFixPlayer).Methods(http.MethodPut)
 	router.HandleFunc("/api/profiles/{profileID}/saves/{saveName}/jobs", handleListJobs).Methods(http.MethodGet)
 	router.HandleFunc("/api/profiles/{profileID}/saves/{saveName}/jobs", handleAddJob).Methods(http.MethodPost)
@@ -39,5 +40,9 @@ func handleListJobs(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleSetTrailer(w http.ResponseWriter, r *http.Request) {
+	// FIXME: Implementation missing
+}
+
+func handleUpdateSaveInfo(w http.ResponseWriter, r *http.Request) {
 	// FIXME: Implementation missing
 }
