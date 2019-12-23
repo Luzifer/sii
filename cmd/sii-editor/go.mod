@@ -2,6 +2,8 @@ module github.com/Luzifer/sii/cmd/sii-editor
 
 go 1.13
 
+replace github.com/Luzifer/sii => ../../
+
 require (
 	github.com/Luzifer/rconfig/v2 v2.2.1
 	github.com/gorilla/mux v1.7.3
