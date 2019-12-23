@@ -64,7 +64,21 @@ func handleFixPlayer(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleGetSaveInfo(w http.ResponseWriter, r *http.Request) {
-	// FIXME: Implementation missing
+	var vars = mux.Vars(r)
+
+	game, _, err := loadSave(vars["profileID"], vars["saveFolder"])
+	if err != nil {
+		apiGenericError(w, http.StatusInternalServerError, errors.Wrap(err, "Unable to load save"))
+		return
+	}
+
+	info, err := commSaveDetailsFromUnit(game)
+	if err != nil {
+		apiGenericError(w, http.StatusInternalServerError, errors.Wrap(err, "Unable to gather info"))
+		return
+	}
+
+	apiGenericJSONResponse(w, http.StatusOK, info)
 }
 
 func handleListJobs(w http.ResponseWriter, r *http.Request) {
