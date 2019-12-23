@@ -58,6 +58,8 @@ func main() {
 		log.WithError(err).Fatal("Unable to load missing defaults for user config")
 	}
 
+	log.WithField("addr", cfg.Listen).Info("Starting API server")
+
 	if err := http.ListenAndServe(cfg.Listen, router); err != nil {
 		log.WithError(err).Fatal("HTTP server caused an error")
 	}
