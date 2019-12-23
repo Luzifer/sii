@@ -2,9 +2,18 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
 
 func init() {
 	router.HandleFunc("/api/profiles", handleListProfiles).Methods(http.MethodGet)
@@ -28,9 +37,51 @@ func handleGetProfileSaves(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = subscribe // If so open socket and let browser know there are new saves
+	// Remember latest save
+	var latestSave time.Time
+	for _, s := range saves {
+		if s.SaveTime.After(latestSave) {
+			latestSave = s.SaveTime
+		}
+	}
 
-	// FIXME: Implementation missing
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		apiGenericError(w, http.StatusInternalServerError, errors.Wrap(err, "Unable to open websocket"))
+		return
+	}
+	defer conn.Close()
+
+	if err = conn.WriteJSON(saves); err != nil {
+		log.WithError(err).Error("Unable to send saves list")
+		return
+	}
+
+	for {
+		profiles, err := listProfiles()
+		if err != nil {
+			log.WithError(err).Error("Unable to list profiles during socket")
+			return
+		}
+
+		// Checking "not after" as we don't need to act on before and equal
+		if !profiles[vars["profileID"]].SaveTime.After(latestSave) {
+			continue
+		}
+
+		saves, err = listSaves(vars["profileID"])
+		if err != nil {
+			log.WithError(err).Error("Unable to list saves during socket")
+			return
+		}
+
+		if err = conn.WriteJSON(saves); err != nil {
+			log.WithError(err).Error("Unable to send saves list")
+			return
+		}
+
+		latestSave = profiles[vars["profileID"]].SaveTime
+	}
 }
 
 func handleListProfiles(w http.ResponseWriter, r *http.Request) {
