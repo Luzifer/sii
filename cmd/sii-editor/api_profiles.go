@@ -1,8 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func init() {
@@ -11,7 +12,21 @@ func init() {
 }
 
 func handleGetProfileSaves(w http.ResponseWriter, r *http.Request) {
-	var subscribe = r.FormValue("subscribe") == "true"
+	var (
+		subscribe = r.FormValue("subscribe") == "true"
+		vars      = mux.Vars(r)
+	)
+
+	saves, err := listSaves(vars["profileID"])
+	if err != nil {
+		apiGenericError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if !subscribe {
+		apiGenericJSONResponse(w, http.StatusOK, saves)
+		return
+	}
 
 	_ = subscribe // If so open socket and let browser know there are new saves
 
@@ -25,5 +40,5 @@ func handleListProfiles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(profiles)
+	apiGenericJSONResponse(w, http.StatusOK, profiles)
 }
