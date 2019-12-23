@@ -5,8 +5,8 @@ func init() {
 }
 
 type GPSWaypointStorage struct {
-	NavNodePosition [3]float32 `sii:"nav_node_position"`
-	Direction       Ptr        `sii:"direction"`
+	NavNodePosition [3]int64 `sii:"nav_node_position"`
+	Direction       Ptr      `sii:"direction"`
 
 	blockName string
 }

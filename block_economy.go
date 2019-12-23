@@ -53,17 +53,17 @@ type Economy struct {
 	StoredRainWetness              int64      `sii:"stored_rain_wetness"`
 	TimeZone                       int64      `sii:"time_zone"`
 	TimeZoneName                   string     `sii:"time_zone_name"`
-	LastFerryPosition              [3]float32 `sii:"last_ferry_position"`
+	LastFerryPosition              [3]int64   `sii:"last_ferry_position"`
 	StoredShowWeigh                bool       `sii:"stored_show_weigh"`
 	StoredNeedToWeigh              bool       `sii:"stored_need_to_weigh"`
-	StoredNavStartPos              [3]float32 `sii:"stored_nav_start_pos"`
-	StoredNavEndPos                [3]float32 `sii:"stored_nav_end_pos"`
+	StoredNavStartPos              [3]int64   `sii:"stored_nav_start_pos"`
+	StoredNavEndPos                [3]int64   `sii:"stored_nav_end_pos"`
 	StoredGPSBehind                int64      `sii:"stored_gps_behind"`
 	StoredGPSAhead                 int64      `sii:"stored_gps_ahead"`
 	StoredGPSBehindWaypoints       []Ptr      `sii:"stored_gps_behind_waypoints"`
 	StoredGPSAheadWaypoints        []Ptr      `sii:"stored_gps_ahead_waypoints"`
 	StoredGPSAvoidWaypoints        []Ptr      `sii:"stored_gps_avoid_waypoints"`
-	StoredStartTollgatePos         [3]float32 `sii:"stored_start_tollgate_pos"`
+	StoredStartTollgatePos         [3]int64   `sii:"stored_start_tollgate_pos"`
 	StoredTutorialState            int64      `sii:"stored_tutorial_state"`
 	StoredMapActions               []Ptr      `sii:"stored_map_actions"`
 	CleanDistanceCounter           int64      `sii:"clean_distance_counter"`

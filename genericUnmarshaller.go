@@ -131,6 +131,28 @@ func genericUnmarshal(in []byte, out interface{}, unit *Unit) error {
 
 				}
 
+			case reflect.Int64:
+				switch typeField.Type.Len() {
+
+				case 3:
+					grps := regexp.MustCompile(`^\(([0-9.-]+), ([0-9.-]+), ([0-9.-]+)\)$`).
+						FindSubmatch(getSingleValue(in, attributeName))
+					var v [3]int64
+
+					for i := range v {
+						val, err := strconv.ParseInt(string(grps[i+1][:]), 10, 64)
+						if err != nil {
+							return errors.Wrapf(err, "Unable to parse int64 for attribute %q", attributeName)
+						}
+						v[i] = val
+					}
+					valField.Set(reflect.ValueOf(v))
+
+				default:
+					return errors.Errorf("Unsupported type: [%d]%s", typeField.Type.Len(), typeField.Type.Elem().Kind())
+
+				}
+
 			default:
 				return errors.Errorf("Unsupported type: [%d]%s", typeField.Type.Len(), typeField.Type.Elem().Kind())
 

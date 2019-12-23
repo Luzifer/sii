@@ -104,6 +104,24 @@ func genericMarshal(in interface{}) ([]byte, error) {
 
 				buf.WriteString(fmt.Sprintf(" %s: (%s)\n", attributeName, bytes.Join(vals, []byte(", "))))
 
+			case reflect.Int64:
+				var vals [][]byte
+
+				switch typeField.Type.Len() {
+
+				case 3:
+					for _, v := range valField.Interface().([3]int64) {
+						bv := []byte(strconv.FormatInt(v, 10))
+						vals = append(vals, bv)
+					}
+
+				default:
+					return nil, errors.Errorf("Unsupported type: [%d]%s", typeField.Type.Len(), typeField.Type.Elem().Kind())
+
+				}
+
+				buf.WriteString(fmt.Sprintf(" %s: (%s)\n", attributeName, bytes.Join(vals, []byte(", "))))
+
 			default:
 				return nil, errors.Errorf("Unsupported type: [%d]%s", typeField.Type.Len(), typeField.Type.Elem().Kind())
 
