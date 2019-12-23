@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
 	"net/http"
 	"os"
@@ -9,11 +10,13 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/Luzifer/rconfig/v2"
+	"github.com/Luzifer/sii"
 )
 
 var (
 	cfg = struct {
 		Config         string `flag:"config,c" vardefault:"config" description:"Optional configuration file"`
+		DecryptKey     string `flag:"decrypt-key" default:"" description:"Hex formated decryption key" validate:"nonzero"`
 		Listen         string `flag:"listen" default:":3000" description:"Port/IP to listen on"`
 		LogLevel       string `flag:"log-level" default:"info" description:"Log level (debug, info, warn, error, fatal)"`
 		VersionAndExit bool   `flag:"version" default:"false" description:"Prints current version and exits"`
@@ -48,7 +51,12 @@ func init() {
 }
 
 func main() {
-	var err error
+	decryptKey, err := hex.DecodeString(cfg.DecryptKey)
+	if err != nil {
+		log.WithError(err).Fatal("Unable to read encryption key")
+	}
+
+	sii.SetEncryptionKey(decryptKey)
 
 	if userConfig, err = loadUserConfig(cfg.Config); err != nil && err != errUserConfigNotFound {
 		log.WithError(err).Fatal("Unable to load user config")

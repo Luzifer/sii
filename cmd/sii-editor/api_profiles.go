@@ -1,15 +1,13 @@
 package main
 
-import "net/http"
+import (
+	"encoding/json"
+	"net/http"
+)
 
 func init() {
 	router.HandleFunc("/api/profiles", handleListProfiles).Methods(http.MethodGet)
-	router.HandleFunc("/api/profiles/{profileID}", handleGetProfileInfo).Methods(http.MethodGet)
 	router.HandleFunc("/api/profiles/{profileID}/saves", handleGetProfileSaves).Methods(http.MethodGet)
-}
-
-func handleGetProfileInfo(w http.ResponseWriter, r *http.Request) {
-	// FIXME: Implementation missing
 }
 
 func handleGetProfileSaves(w http.ResponseWriter, r *http.Request) {
@@ -21,5 +19,11 @@ func handleGetProfileSaves(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleListProfiles(w http.ResponseWriter, r *http.Request) {
-	// FIXME: Implementation missing
+	profiles, err := listProfiles()
+	if err != nil {
+		apiGenericError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	json.NewEncoder(w).Encode(profiles)
 }
