@@ -37,6 +37,10 @@ func fixPlayerTruck(unit *sii.Unit, fixType string) error {
 			if v, ok := pb.Resolve().(*sii.VehicleAccessory); ok {
 				v.Wear = 0
 			}
+
+			if v, ok := pb.Resolve().(*sii.VehicleWheelAccessory); ok {
+				v.Wear = 0
+			}
 		}
 	}
 
@@ -45,6 +49,10 @@ func fixPlayerTruck(unit *sii.Unit, fixType string) error {
 		trailer := player.AssignedTrailer.Resolve().(*sii.Trailer)
 		for _, pb := range trailer.Accessories {
 			if v, ok := pb.Resolve().(*sii.VehicleAccessory); ok {
+				v.Wear = 0
+			}
+
+			if v, ok := pb.Resolve().(*sii.VehicleWheelAccessory); ok {
 				v.Wear = 0
 			}
 		}
