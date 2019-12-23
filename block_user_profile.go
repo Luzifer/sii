@@ -12,7 +12,7 @@ type UserProfile struct {
 	CompanyName      string     `sii:"company_name"`
 	Male             bool       `sii:"male"`
 	CachedExperience int64      `sii:"cached_experience"`
-	CachedDistance   int64      `sii:"18182"`
+	CachedDistance   int64      `sii:"cached_distance"`
 	UserData         []RawValue `sii:"user_data"`
 	ActiveMods       []string   `sii:"active_mods"`
 	Customization    int64      `sii:"customization"` // ??? Maybe bit-flags?
