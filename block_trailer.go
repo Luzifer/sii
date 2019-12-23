@@ -6,7 +6,7 @@ func init() {
 
 type Trailer struct {
 	TrailerDefinition       Ptr     `sii:"trailer_definition"`
-	CargoMass               int64   `sii:"cargo_mass"`
+	CargoMass               float32 `sii:"cargo_mass"`
 	CargoDamage             float32 `sii:"cargo_damage"`               // Needs verification
 	VirtualRearWheelsOffset int64   `sii:"virtual_rear_wheels_offset"` // Needs verification
 	SlaveTrailer            Ptr     `sii:"slave_trailer"`
