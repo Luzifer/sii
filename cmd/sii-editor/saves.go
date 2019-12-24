@@ -16,33 +16,48 @@ const (
 )
 
 type commSaveDetails struct {
-	CargoDamage     float32
-	TruckWear       float32
-	TrailerAttached bool
-	TrailerWear     float32
+	GameTime int64 `json:"game_time"`
+
+	ExperiencePoints int64 `json:"experience_points"`
+	Money            int64 `json:"money"`
+
+	CargoDamage     float32 `json:"cargo_damage"`
+	TruckWear       float32 `json:"truck_wear"`
+	TrailerAttached bool    `json:"trailer_attached"`
+	TrailerWear     float32 `json:"trailer_wear"`
 
 	// FIXME: Add more details for profile
-	// e.g. current job, money, xp
+	// e.g. current job
 }
 
 func commSaveDetailsFromUnit(unit *sii.Unit) (out commSaveDetails, err error) {
-	var player *sii.Player
+	var (
+		economy *sii.Economy
+	)
 
 	for _, b := range unit.Entries {
-		if v, ok := b.(*sii.Player); ok {
-			player = v
-			break
+		if v, ok := b.(*sii.Economy); ok {
+			economy = v
 		}
 	}
 
-	if player == nil {
-		return out, errors.New("Found no player object")
+	if economy == nil {
+		return out, errors.New("Found no economy object")
 	}
 
 	var (
+		bank    *sii.Bank
+		player  *sii.Player
 		truck   *sii.Vehicle
 		trailer *sii.Trailer
 	)
+
+	bank = economy.Bank.Resolve().(*sii.Bank)
+	player = economy.Player.Resolve().(*sii.Player)
+
+	out.ExperiencePoints = economy.ExperiencePoints
+	out.GameTime = economy.GameTime
+	out.Money = bank.MoneyAccount
 
 	if v, ok := player.AssignedTruck.Resolve().(*sii.Vehicle); ok {
 		truck = v
@@ -53,6 +68,7 @@ func commSaveDetailsFromUnit(unit *sii.Unit) (out commSaveDetails, err error) {
 	}
 
 	if trailer != nil {
+		out.TrailerAttached = true
 		for _, pb := range trailer.Accessories {
 			var wear float32
 			if v, ok := pb.Resolve().(*sii.VehicleAccessory); ok {
