@@ -120,13 +120,13 @@ func commSaveDetailsFromUnit(unit *sii.Unit) (out commSaveDetails, err error) {
 	if job != nil {
 		out.CurrentJob = &commSaveJob{
 			OriginReference: job.SourceCompany.Target,
-			// Resolve OriginName
+			OriginName:      baseGameUnit.BlockByName(job.SourceCompany.Resolve().(*sii.Company).PermanentData.Target).(*sii.CompanyPermanent).CompanyName,
 			TargetReference: job.TargetCompany.Target,
-			// Resolve TargetName
-			CargoReference: job.Cargo.Target,
-			// Resolve CargoName
-			CargoWeight: trailer.CargoMass,
-			Distance:    job.PlannedDistanceKM,
+			TargetName:      baseGameUnit.BlockByName(job.TargetCompany.Resolve().(*sii.Company).PermanentData.Target).(*sii.CompanyPermanent).CompanyName,
+			CargoReference:  job.Cargo.Target,
+			CargoName:       baseGameUnit.BlockByName(job.Cargo.Target).(*sii.CargoData).CargoName,
+			CargoWeight:     trailer.CargoMass,
+			Distance:        job.PlannedDistanceKM,
 		}
 	}
 

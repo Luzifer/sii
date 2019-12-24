@@ -73,9 +73,10 @@ func main() {
 		log.WithError(err).Fatal("Unable to load game definitions")
 	}
 
-	for _, b := range baseGameUnit.Entries {
-		log.Printf("%+v", b)
-	}
+	log.WithFields(log.Fields{
+		"companies": len(baseGameUnit.BlocksByClass("company_permanent")),
+		"cargos":    len(baseGameUnit.BlocksByClass("cargo_data")),
+	}).Info("Game base data loaded")
 
 	log.WithField("addr", cfg.Listen).Info("Starting API server...")
 
