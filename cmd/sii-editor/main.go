@@ -22,8 +22,9 @@ var (
 		VersionAndExit bool   `flag:"version" default:"false" description:"Prints current version and exits"`
 	}{}
 
-	router     = mux.NewRouter()
-	userConfig *configFile
+	baseGameUnit *sii.Unit
+	router       = mux.NewRouter()
+	userConfig   *configFile
 
 	version = "dev"
 )
@@ -66,7 +67,17 @@ func main() {
 		log.WithError(err).Fatal("Unable to load missing defaults for user config")
 	}
 
-	log.WithField("addr", cfg.Listen).Info("Starting API server")
+	log.Info("Loading game base data...")
+
+	if baseGameUnit, err = readBaseData(); err != nil {
+		log.WithError(err).Fatal("Unable to load game definitions")
+	}
+
+	for _, b := range baseGameUnit.Entries {
+		log.Printf("%+v", b)
+	}
+
+	log.WithField("addr", cfg.Listen).Info("Starting API server...")
 
 	if err := http.ListenAndServe(cfg.Listen, router); err != nil {
 		log.WithError(err).Fatal("HTTP server caused an error")

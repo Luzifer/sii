@@ -6,6 +6,7 @@ replace github.com/Luzifer/sii => ../../
 
 require (
 	github.com/Luzifer/rconfig/v2 v2.2.1
+	github.com/Luzifer/scs-extract v0.1.0
 	github.com/Luzifer/sii v0.0.0-00010101000000-000000000000
 	github.com/gorilla/mux v1.7.3
 	github.com/gorilla/websocket v1.4.1
