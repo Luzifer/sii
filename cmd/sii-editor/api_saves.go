@@ -17,7 +17,7 @@ const (
 
 func init() {
 	router.HandleFunc("/api/profiles/{profileID}/saves/{saveFolder}", handleGetSaveInfo).Methods(http.MethodGet)
-	router.HandleFunc("/api/profiles/{profileID}/saves/{saveFolder}/economy/{type}", handleUpdateEconomyInfo).Methods(http.MethodPut)
+	router.HandleFunc("/api/profiles/{profileID}/saves/{saveFolder}/economy", handleUpdateEconomyInfo).Methods(http.MethodPut)
 	router.HandleFunc("/api/profiles/{profileID}/saves/{saveFolder}/fix", handleFixPlayer).Methods(http.MethodPut)
 	router.HandleFunc("/api/profiles/{profileID}/saves/{saveFolder}/jobs", handleListJobs).Methods(http.MethodGet)
 	router.HandleFunc("/api/profiles/{profileID}/saves/{saveFolder}/jobs", handleAddJob).Methods(http.MethodPost)
