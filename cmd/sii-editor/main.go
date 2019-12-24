@@ -74,8 +74,9 @@ func main() {
 	}
 
 	log.WithFields(log.Fields{
-		"companies": len(baseGameUnit.BlocksByClass("company_permanent")),
 		"cargos":    len(baseGameUnit.BlocksByClass("cargo_data")),
+		"cities":    len(baseGameUnit.BlocksByClass("city_data")),
+		"companies": len(baseGameUnit.BlocksByClass("company_permanent")),
 	}).Info("Game base data loaded")
 
 	log.WithField("addr", cfg.Listen).Info("Starting API server...")

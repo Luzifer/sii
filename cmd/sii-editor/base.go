@@ -15,7 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var baseDataFiles = regexp.MustCompile(`^def/(?:cargo|company)/[^/]+.sii$`)
+var baseDataFiles = regexp.MustCompile(`^def/(?:cargo|city|company)/[^/]+.sii$`)
 
 func readBaseData() (*sii.Unit, error) {
 	var unitData = new(bytes.Buffer)
