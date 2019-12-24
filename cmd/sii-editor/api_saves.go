@@ -3,8 +3,10 @@ package main
 import (
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/Luzifer/go_helpers/v2/str"
 	"github.com/Luzifer/sii"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -84,7 +86,49 @@ func handleGetSaveInfo(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleListJobs(w http.ResponseWriter, r *http.Request) {
-	// FIXME: Implementation missing
+	var (
+		result       []commSaveJob
+		vars         = mux.Vars(r)
+		undiscovered = r.FormValue("undiscovered") == "true"
+	)
+
+	game, _, err := loadSave(vars["profileID"], vars["saveFolder"])
+	if err != nil {
+		apiGenericError(w, http.StatusInternalServerError, errors.Wrap(err, "Unable to load save"))
+		return
+	}
+
+	economy := game.BlocksByClass("economy")[0].(*sii.Economy)
+	var visitedCities []string
+	for _, p := range economy.VisitedCities {
+		visitedCities = append(visitedCities, p.Target)
+	}
+
+	for _, cb := range game.BlocksByClass("company") {
+		c := cb.(*sii.Company)
+
+		cityName := strings.TrimPrefix(c.CityPtr().Target, "city.") // The "VisitedCities" pointers are kinda broken and do not contain the "city." part
+		if !str.StringInSlice(cityName, visitedCities) && !undiscovered {
+			continue
+		}
+
+		for _, b := range c.JobOffer {
+			j := b.Resolve().(*sii.JobOfferData)
+
+			if j.Target == "" {
+				continue
+			}
+
+			result = append(result, commSaveJob{
+				OriginReference: c.Name(),
+				TargetReference: strings.Join([]string{"company", "volatile", j.Target}, "."),
+				CargoReference:  j.Cargo.Target,
+				Distance:        j.ShortestDistanceKM,
+			})
+		}
+	}
+
+	apiGenericJSONResponse(w, http.StatusOK, result)
 }
 
 func handleSetTrailer(w http.ResponseWriter, r *http.Request) {
