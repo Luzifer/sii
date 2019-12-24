@@ -36,3 +36,24 @@ func (r *RawBlock) UnmarshalSII(in []byte) error {
 type Unit struct {
 	Entries []Block
 }
+
+func (u Unit) BlocksByClass(class string) []Block {
+	var out []Block
+
+	for _, b := range u.Entries {
+		if b.Class() == class {
+			out = append(out, b)
+		}
+	}
+
+	return out
+}
+
+func (u Unit) BlockByName(name string) Block {
+	for _, b := range u.Entries {
+		if b.Name() == name {
+			return b
+		}
+	}
+	return nil
+}
