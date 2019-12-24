@@ -85,7 +85,7 @@ func genericUnmarshal(in []byte, out interface{}, unit *Unit) error {
 
 		case reflect.Int, reflect.Int64:
 			bv := getSingleValue(in, attributeName)
-			if isNilValue(bv) {
+			if isNilValue(bv) || len(bv) == 0 {
 				continue
 			}
 			v, err := strconv.ParseInt(string(bv), 10, 64)
@@ -164,7 +164,7 @@ func genericUnmarshal(in []byte, out interface{}, unit *Unit) error {
 
 			case reflect.Int64:
 				bv := getSingleValue(in, attributeName)
-				if !isNilValue(bv) {
+				if !isNilValue(bv) && len(bv) > 0 {
 					v, err := strconv.ParseInt(string(bv), 10, 64)
 					if err != nil {
 						return errors.Wrapf(err, "Unable to parse int for attribute %q", attributeName)
@@ -260,6 +260,10 @@ func genericUnmarshal(in []byte, out interface{}, unit *Unit) error {
 			case reflect.Int64:
 				var v []int64
 				for _, bv := range ba {
+					if len(bv) == 0 {
+						v = append(v, 0)
+						continue
+					}
 					pbv, err := strconv.ParseInt(string(bv), 10, 64)
 					if err != nil {
 						return errors.Wrapf(err, "Unable to parse int for attribute %q", attributeName)

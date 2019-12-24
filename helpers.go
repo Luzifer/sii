@@ -33,6 +33,10 @@ func float2sii(f float32) ([]byte, error) {
 }
 
 func sii2float(f []byte) (float32, error) {
+	if len(f) == 0 {
+		return 0, nil
+	}
+
 	if f[0] != '&' {
 		out, err := strconv.ParseFloat(string(f), 32)
 		return float32(out), err
