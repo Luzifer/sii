@@ -98,7 +98,7 @@ func commSaveDetailsFromUnit(unit *sii.Unit) (out commSaveDetails, err error) {
 		out.OwnedTrailers = map[string]string{}
 		for _, tp := range player.Trailers {
 			if t, ok := tp.Resolve().(*sii.Trailer); ok {
-				out.OwnedTrailers[t.Name()] = t.LicensePlate
+				out.OwnedTrailers[t.Name()] = t.CleanedLicensePlate()
 			}
 		}
 	}
