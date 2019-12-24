@@ -1,5 +1,7 @@
 package sii
 
+import "strings"
+
 func init() {
 	RegisterBlock(&Company{})
 }
@@ -23,3 +25,12 @@ func (c *Company) Init(class, name string) {
 }
 
 func (c Company) Name() string { return c.blockName }
+
+func (c Company) CityPtr() *Ptr {
+	nameParts := strings.Split(c.Name(), ".")
+	if len(nameParts) != 4 || nameParts[0] != "company" || nameParts[1] != "volatile" {
+		return nil
+	}
+
+	return &Ptr{Target: strings.Join([]string{"city", nameParts[3]}, ".")}
+}
