@@ -88,7 +88,33 @@ func handleListJobs(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleSetTrailer(w http.ResponseWriter, r *http.Request) {
-	// FIXME: Implementation missing
+	var (
+		reference = r.FormValue("ref")
+		vars      = mux.Vars(r)
+	)
+
+	game, info, err := loadSave(vars["profileID"], vars["saveFolder"])
+	if err != nil {
+		apiGenericError(w, http.StatusInternalServerError, errors.Wrap(err, "Unable to load save"))
+		return
+	}
+
+	if game.BlockByName(reference) == nil {
+		apiGenericError(w, http.StatusBadRequest, errors.New("Invalid reference given"))
+		return
+	}
+
+	info.SaveName = storeSaveName
+	info.FileTime = time.Now().Unix()
+
+	game.BlocksByClass("player")[0].(*sii.Player).AssignedTrailer = sii.Ptr{Target: reference}
+
+	if err = storeSave(vars["profileID"], storeSaveFolder, game, info); err != nil {
+		apiGenericError(w, http.StatusInternalServerError, errors.Wrap(err, "Unable to store save"))
+		return
+	}
+
+	apiGenericJSONResponse(w, http.StatusOK, map[string]interface{}{"success": true})
 }
 
 func handleUpdateEconomyInfo(w http.ResponseWriter, r *http.Request) {
