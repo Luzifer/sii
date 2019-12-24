@@ -13,8 +13,8 @@ func init() {
 }
 
 type commCompany struct {
-	City string
-	Name string
+	City string `json:"city"`
+	Name string `json:"name"`
 }
 
 func handleListCompanies(w http.ResponseWriter, r *http.Request) {
