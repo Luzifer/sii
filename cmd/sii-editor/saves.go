@@ -30,12 +30,10 @@ type commSaveDetails struct {
 }
 
 type commSaveJob struct {
-	OriginReference string  `json:"origin_reference"`
-	TargetReference string  `json:"target_reference"`
-	CargoReference  string  `json:"cargo_reference"`
-	CargoName       string  `json:"cargo_name"`
-	CargoWeight     float32 `json:"cargo_weight"`
-	Distance        int64   `json:"distance"`
+	OriginReference string `json:"origin_reference"`
+	TargetReference string `json:"target_reference"`
+	CargoReference  string `json:"cargo_reference"`
+	Distance        int64  `json:"distance"`
 }
 
 func commSaveDetailsFromUnit(unit *sii.Unit) (out commSaveDetails, err error) {
@@ -120,8 +118,6 @@ func commSaveDetailsFromUnit(unit *sii.Unit) (out commSaveDetails, err error) {
 			OriginReference: job.SourceCompany.Target,
 			TargetReference: job.TargetCompany.Target,
 			CargoReference:  job.Cargo.Target,
-			CargoName:       baseGameUnit.BlockByName(job.Cargo.Target).(*sii.CargoData).CargoName,
-			CargoWeight:     trailer.CargoMass,
 			Distance:        job.PlannedDistanceKM,
 		}
 	}

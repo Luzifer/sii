@@ -9,12 +9,32 @@ import (
 )
 
 func init() {
+	router.HandleFunc("/api/gameinfo/cargo", handleListCargo).Methods(http.MethodGet)
 	router.HandleFunc("/api/profiles/{profileID}/saves/{saveFolder}/companies", handleListCompanies).Methods(http.MethodGet)
+}
+
+type commCargo struct {
+	Name string  `json:"name"`
+	Mass float32 `json:"mass"`
 }
 
 type commCompany struct {
 	City string `json:"city"`
 	Name string `json:"name"`
+}
+
+func handleListCargo(w http.ResponseWriter, r *http.Request) {
+	var result = map[string]commCargo{}
+
+	for _, b := range baseGameUnit.BlocksByClass("cargo_data") {
+		c := b.(*sii.CargoData)
+		result[c.Name()] = commCargo{
+			Name: c.CargoName,
+			Mass: c.Mass,
+		}
+	}
+
+	apiGenericJSONResponse(w, http.StatusOK, result)
 }
 
 func handleListCompanies(w http.ResponseWriter, r *http.Request) {
