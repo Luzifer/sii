@@ -1,5 +1,10 @@
 package sii
 
+import (
+	"regexp"
+	"strings"
+)
+
 func init() {
 	RegisterBlock(&Trailer{})
 }
@@ -30,3 +35,13 @@ func (t *Trailer) Init(class, name string) {
 }
 
 func (t Trailer) Name() string { return t.blockName }
+
+func (t Trailer) CleanedLicensePlate() string {
+	return regexp.MustCompile(` +`).ReplaceAllString(
+		regexp.MustCompile(`<[^>]+>`).ReplaceAllString(
+			strings.Split(t.LicensePlate, "|")[0],
+			" ",
+		),
+		" ",
+	)
+}
