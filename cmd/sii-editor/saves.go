@@ -26,6 +26,8 @@ type commSaveDetails struct {
 	TrailerAttached bool    `json:"trailer_attached"`
 	TrailerWear     float32 `json:"trailer_wear"`
 
+	OwnedTrailers map[string]string `json:"owned_trailers"`
+
 	CurrentJob *commSaveJob `json:"current_job"`
 }
 
@@ -89,6 +91,15 @@ func commSaveDetailsFromUnit(unit *sii.Unit) (out commSaveDetails, err error) {
 
 		if wear > out.TruckWear {
 			out.TruckWear = wear
+		}
+	}
+
+	if len(player.Trailers) > 0 {
+		out.OwnedTrailers = map[string]string{}
+		for _, tp := range player.Trailers {
+			if t, ok := tp.Resolve().(*sii.Trailer); ok {
+				out.OwnedTrailers[t.Name()] = t.LicensePlate
+			}
 		}
 	}
 
