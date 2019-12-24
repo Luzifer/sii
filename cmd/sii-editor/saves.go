@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 	"path"
-	"strings"
 
 	"github.com/Luzifer/sii"
 	"github.com/pkg/errors"
@@ -32,9 +31,7 @@ type commSaveDetails struct {
 
 type commSaveJob struct {
 	OriginReference string  `json:"origin_reference"`
-	OriginName      string  `json:"origin_name"`
 	TargetReference string  `json:"target_reference"`
-	TargetName      string  `json:"target_name"`
 	CargoReference  string  `json:"cargo_reference"`
 	CargoName       string  `json:"cargo_name"`
 	CargoWeight     float32 `json:"cargo_weight"`
@@ -119,21 +116,9 @@ func commSaveDetailsFromUnit(unit *sii.Unit) (out commSaveDetails, err error) {
 	}
 
 	if job != nil {
-		originName := strings.Join([]string{
-			baseGameUnit.BlockByName(job.SourceCompany.Resolve().(*sii.Company).PermanentData.Target).(*sii.CompanyPermanent).CompanyName,
-			baseGameUnit.BlockByName(job.SourceCompany.Resolve().(*sii.Company).CityPtr().Target).(*sii.CityData).CityName,
-		}, ", ")
-
-		targetName := strings.Join([]string{
-			baseGameUnit.BlockByName(job.TargetCompany.Resolve().(*sii.Company).PermanentData.Target).(*sii.CompanyPermanent).CompanyName,
-			baseGameUnit.BlockByName(job.TargetCompany.Resolve().(*sii.Company).CityPtr().Target).(*sii.CityData).CityName,
-		}, ", ")
-
 		out.CurrentJob = &commSaveJob{
 			OriginReference: job.SourceCompany.Target,
-			OriginName:      originName,
 			TargetReference: job.TargetCompany.Target,
-			TargetName:      targetName,
 			CargoReference:  job.Cargo.Target,
 			CargoName:       baseGameUnit.BlockByName(job.Cargo.Target).(*sii.CargoData).CargoName,
 			CargoWeight:     trailer.CargoMass,
