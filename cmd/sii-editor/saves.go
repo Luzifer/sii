@@ -37,11 +37,9 @@ type commSaveJob struct {
 }
 
 func commSaveDetailsFromUnit(unit *sii.Unit) (out commSaveDetails, err error) {
-	var (
-		economy *sii.Economy
-	)
+	var economy *sii.Economy
 
-	for _, b := range unit.Entries {
+	for _, b := range unit.BlocksByClass("economy") {
 		if v, ok := b.(*sii.Economy); ok {
 			economy = v
 		}

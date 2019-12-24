@@ -2,8 +2,10 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
+	"github.com/Luzifer/sii"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 )
@@ -90,5 +92,47 @@ func handleSetTrailer(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleUpdateEconomyInfo(w http.ResponseWriter, r *http.Request) {
-	// FIXME: Implementation missing
+	var vars = mux.Vars(r)
+
+	game, info, err := loadSave(vars["profileID"], vars["saveFolder"])
+	if err != nil {
+		apiGenericError(w, http.StatusInternalServerError, errors.Wrap(err, "Unable to load save"))
+		return
+	}
+
+	info.SaveName = storeSaveName
+	info.FileTime = time.Now().Unix()
+
+	blocks := game.BlocksByClass("economy")
+	if len(blocks) != 1 {
+		// expecting exactly one economy block
+		apiGenericError(w, http.StatusInternalServerError, errors.New("Did not find economy block"))
+		return
+	}
+	economy := blocks[0].(*sii.Economy)
+
+	if xpRaw := r.FormValue("xp"); xpRaw != "" {
+		xp, err := strconv.ParseInt(xpRaw, 10, 64)
+		if err != nil {
+			apiGenericError(w, http.StatusBadRequest, errors.Wrap(err, "Invalid value to xp parameter"))
+			return
+		}
+		economy.ExperiencePoints = xp
+	}
+
+	if moneyRaw := r.FormValue("money"); moneyRaw != "" {
+		money, err := strconv.ParseInt(moneyRaw, 10, 64)
+		if err != nil {
+			apiGenericError(w, http.StatusBadRequest, errors.Wrap(err, "Invalid value to money parameter"))
+			return
+		}
+		economy.Bank.Resolve().(*sii.Bank).MoneyAccount = money
+	}
+
+	if err = storeSave(vars["profileID"], storeSaveFolder, game, info); err != nil {
+		apiGenericError(w, http.StatusInternalServerError, errors.Wrap(err, "Unable to store save"))
+		return
+	}
+
+	apiGenericJSONResponse(w, http.StatusOK, map[string]interface{}{"success": true})
 }
