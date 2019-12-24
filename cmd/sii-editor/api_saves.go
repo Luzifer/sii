@@ -24,7 +24,6 @@ func init() {
 	router.HandleFunc("/api/profiles/{profileID}/saves/{saveFolder}/fix", handleFixPlayer).Methods(http.MethodPut)
 	router.HandleFunc("/api/profiles/{profileID}/saves/{saveFolder}/jobs", handleListJobs).Methods(http.MethodGet)
 	router.HandleFunc("/api/profiles/{profileID}/saves/{saveFolder}/jobs", handleAddJob).Methods(http.MethodPost)
-	router.HandleFunc("/api/profiles/{profileID}/saves/{saveFolder}/jobs/{jobID}", handleEditJob).Methods(http.MethodPut)
 	router.HandleFunc("/api/profiles/{profileID}/saves/{saveFolder}/set-trailer", handleSetTrailer).Methods(http.MethodPut)
 }
 
@@ -103,10 +102,6 @@ func handleAddJob(w http.ResponseWriter, r *http.Request) {
 	}
 
 	apiGenericJSONResponse(w, http.StatusOK, map[string]interface{}{"success": true})
-}
-
-func handleEditJob(w http.ResponseWriter, r *http.Request) {
-	// FIXME: Implementation missing
 }
 
 func handleFixPlayer(w http.ResponseWriter, r *http.Request) {
