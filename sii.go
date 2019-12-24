@@ -105,7 +105,7 @@ func ReadUnitFile(filename string) (*Unit, error) {
 		return nil, errors.New("Invalid / unknown file type header found")
 	}
 
-	return parseSIIPlainFile(r)
+	return ParseSIIPlainFile(r)
 }
 
 // SetEncryptionKey sets the 32-byte key to encrypt / decrypt ScsC files.

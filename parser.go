@@ -13,7 +13,7 @@ import (
 
 var blockStartRegex = regexp.MustCompile(`^([^\s:]+)\s?:\s?([^\s]+)(?:\s?\{)?$`)
 
-func parseSIIPlainFile(r io.Reader) (*Unit, error) {
+func ParseSIIPlainFile(r io.Reader) (*Unit, error) {
 	var (
 		blockContent []byte
 		blockName    string
