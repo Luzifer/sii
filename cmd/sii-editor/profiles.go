@@ -14,7 +14,7 @@ import (
 type commSaveInfo struct {
 	Name     string    `json:"name"`
 	GameTime int64     `json:"game_time"`
-	SaveTime time.Time `json:"file_type"`
+	SaveTime time.Time `json:"save_time"`
 }
 
 func commSaveInfoFromSaveContainer(c *sii.SaveContainer) commSaveInfo {
