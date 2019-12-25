@@ -59,21 +59,22 @@ func handleGetProfileSaves(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for t := time.NewTicker(savePollTime); ; <-t.C {
-		profiles, err := listProfiles()
-		if err != nil {
-			log.WithError(err).Error("Unable to list profiles during socket")
-			return
-		}
-
-		// Checking "not after" as we don't need to act on before and equal
-		if !profiles[vars["profileID"]].SaveTime.After(latestSave) {
-			continue
-		}
-
 		saves, err = listSaves(vars["profileID"])
 		if err != nil {
 			log.WithError(err).Error("Unable to list saves during socket")
 			return
+		}
+
+		var newSaveTime time.Time
+		for _, s := range saves {
+			if s.SaveTime.After(latestSave) {
+				newSaveTime = s.SaveTime
+			}
+		}
+
+		if newSaveTime.IsZero() {
+			// Nothing new
+			continue
 		}
 
 		if err = conn.WriteJSON(saves); err != nil {
@@ -81,7 +82,7 @@ func handleGetProfileSaves(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		latestSave = profiles[vars["profileID"]].SaveTime
+		latestSave = newSaveTime
 	}
 }
 
