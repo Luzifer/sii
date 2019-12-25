@@ -196,9 +196,6 @@ const app = new Vue({
         .then((resp) => {
           this.save = resp.data
           this.saveLoading = false
-
-          // Load jobs for that save
-          this.loadJobs()
         })
         .catch((err) => console.error(err))
     },
@@ -246,6 +243,12 @@ const app = new Vue({
       } else {
         this.selectedSave = saveID
       }
+    },
+
+    setEconomy(param, value) {
+      return axios.put(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}/economy?${param}=${value}`)
+        .then(() => console.log('Economy set'))
+        .catch((err) => console.error(err))
     },
   },
 
