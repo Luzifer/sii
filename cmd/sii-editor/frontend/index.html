@@ -82,14 +82,14 @@
               <b-card-group deck>
                 <b-card header="Game info">
                   <b-input-group prepend="Money" class="mb-2">
-                    <b-form-input v-model="save.money"></b-form-input>
+                    <b-form-input v-model="save.money" class="text-right"></b-form-input>
                     <b-input-group-append>
                       <b-button @click="setEconomy('money', save.money)">Set</b-button>
                     </b-input-group-append>
                   </b-input-group>
 
                   <b-input-group prepend="XP" class="mb-2">
-                    <b-form-input v-model="save.experience_points"></b-form-input>
+                    <b-form-input v-model="save.experience_points" class="text-right"></b-form-input>
                     <b-input-group-append>
                       <b-button @click="setEconomy('xp', save.experience_points)">Set</b-button>
                     </b-input-group-append>
