@@ -62,6 +62,10 @@ func handleAddJob(w http.ResponseWriter, r *http.Request) {
 		job.Weight *= 1000
 	}
 
+	if job.Distance == 0 {
+		job.Distance = 100 // If the user did not provide distance use 100km as a default
+	}
+
 	// Get company
 	company := game.BlockByName(job.OriginReference).(*sii.Company)
 	// Get cargo
@@ -76,7 +80,7 @@ func handleAddJob(w http.ResponseWriter, r *http.Request) {
 		Urgency:            job.Urgency,
 		Cargo:              sii.Ptr{Target: job.CargoReference},
 		UnitsCount:         int64(job.Weight / cargo.Mass),
-		ShortestDistanceKM: 1, // Used to calculate the revenue FIXME: Needs to be more accurate than just "1" but no clue how to calculate
+		ShortestDistanceKM: job.Distance,
 
 		// Some static data
 		FillRatio: 1, // Dunno but other jobs have it at 1, so keep for now
