@@ -50,7 +50,7 @@ type Economy struct {
 	StoredGasPumpMoney             int64      `sii:"stored_gas_pump_money"`
 	StoredWeatherChangeTimer       float32    `sii:"stored_weather_change_timer"`
 	StoredCurrentWeather           int64      `sii:"stored_current_weather"`
-	StoredRainWetness              int64      `sii:"stored_rain_wetness"`
+	StoredRainWetness              float32    `sii:"stored_rain_wetness"`
 	TimeZone                       int64      `sii:"time_zone"`
 	TimeZoneName                   string     `sii:"time_zone_name"`
 	LastFerryPosition              [3]int64   `sii:"last_ferry_position"`
