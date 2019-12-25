@@ -82,16 +82,36 @@
               <b-card-group deck>
                 <b-card header="Game info">
                   <b-input-group prepend="Money" class="mb-2">
-                    <b-form-input v-model="save.money" class="text-right"></b-form-input>
+                    <b-form-input
+                      v-model="save.money"
+                      class="text-right"
+                      type="number"
+                      max="2147483647"
+                      min="0"
+                      ref="eco_money"
+                    ></b-form-input>
                     <b-input-group-append>
-                      <b-button @click="setEconomy('money', save.money)">Set</b-button>
+                      <b-button
+                        @click="setEconomy('money', save.money)"
+                        :disabled="!validInt(save.money)"
+                      >Set</b-button>
                     </b-input-group-append>
                   </b-input-group>
 
                   <b-input-group prepend="XP" class="mb-2">
-                    <b-form-input v-model="save.experience_points" class="text-right"></b-form-input>
+                    <b-form-input
+                      v-model="save.experience_points"
+                      class="text-right"
+                      type="number"
+                      max="2147483647"
+                      min="0"
+                      ref="eco_xp"
+                    ></b-form-input>
                     <b-input-group-append>
-                      <b-button @click="setEconomy('xp', save.experience_points)">Set</b-button>
+                      <b-button
+                        @click="setEconomy('xp', save.experience_points)"
+                        :disabled="!validInt(save.experience_points)"
+                      >Set</b-button>
                     </b-input-group-append>
                   </b-input-group>
                 </b-card>

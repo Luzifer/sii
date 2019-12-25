@@ -250,6 +250,10 @@ const app = new Vue({
         .then(() => console.log('Economy set'))
         .catch((err) => console.error(err))
     },
+
+    validInt(v) {
+      return 0 <= v && v <= 2147483647
+    },
   },
 
   watch: {
