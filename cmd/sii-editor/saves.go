@@ -26,7 +26,8 @@ type commSaveDetails struct {
 	TrailerAttached bool    `json:"trailer_attached"`
 	TrailerWear     float32 `json:"trailer_wear"`
 
-	OwnedTrailers map[string]string `json:"owned_trailers"`
+	AttachedTrailer string            `json:"attached_trailer"`
+	OwnedTrailers   map[string]string `json:"owned_trailers"`
 
 	CurrentJob *commSaveJob `json:"current_job"`
 }
@@ -78,6 +79,7 @@ func commSaveDetailsFromUnit(unit *sii.Unit) (out commSaveDetails, err error) {
 	}
 
 	if v, ok := player.AssignedTrailer.Resolve().(*sii.Trailer); ok {
+		out.AttachedTrailer = player.AssignedTrailer.Target
 		trailer = v
 	}
 
