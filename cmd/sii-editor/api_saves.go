@@ -198,6 +198,7 @@ func handleListJobs(w http.ResponseWriter, r *http.Request) {
 				CargoReference:  j.Cargo.Target,
 				Distance:        j.ShortestDistanceKM,
 				Urgency:         j.Urgency,
+				Expires:         *j.ExpirationTime - economy.GameTime,
 			})
 		}
 	}

@@ -33,12 +33,14 @@ type commSaveDetails struct {
 }
 
 type commSaveJob struct {
-	OriginReference string  `json:"origin_reference"`
-	TargetReference string  `json:"target_reference"`
-	CargoReference  string  `json:"cargo_reference"`
-	Distance        int64   `json:"distance"`
-	Urgency         *int64  `json:"urgency,omitempty"`
-	Weight          float32 `json:"weight,omitempty"`
+	OriginReference  string  `json:"origin_reference"`
+	TargetReference  string  `json:"target_reference"`
+	CargoReference   string  `json:"cargo_reference"`
+	TrailerReference string  `json:"trailer_reference"`
+	Distance         int64   `json:"distance"`
+	Urgency          *int64  `json:"urgency,omitempty"`
+	Weight           float32 `json:"weight,omitempty"`
+	Expires          int64   `json:"expires,omitempty"`
 }
 
 func commSaveDetailsFromUnit(unit *sii.Unit) (out commSaveDetails, err error) {
@@ -128,11 +130,12 @@ func commSaveDetailsFromUnit(unit *sii.Unit) (out commSaveDetails, err error) {
 
 	if job != nil {
 		out.CurrentJob = &commSaveJob{
-			OriginReference: job.SourceCompany.Target,
-			TargetReference: job.TargetCompany.Target,
-			CargoReference:  job.Cargo.Target,
-			Distance:        job.PlannedDistanceKM,
-			Urgency:         job.Urgency,
+			OriginReference:  job.SourceCompany.Target,
+			TargetReference:  job.TargetCompany.Target,
+			CargoReference:   job.Cargo.Target,
+			TrailerReference: job.CompanyTrailer.Target,
+			Distance:         job.PlannedDistanceKM,
+			Urgency:          job.Urgency,
 		}
 	}
 
