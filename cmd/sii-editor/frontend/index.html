@@ -175,6 +175,20 @@
       </b-row>
     </b-container>
 
+    <b-modal
+      centered
+      hide-footer
+      hide-header
+      no-close-on-backdrop
+      no-close-on-esc
+      size="sm"
+      :visible="showSaveModal"
+    >
+      <div class="text-center">
+        <i class="fa fa-spinner fa-pulse fa-4x mb-3"></i><br>
+        Modifying save-game...
+      </div>
+    </b-modal>
   </div>
 
   <script type="application/javascript" src="/asset/combine.js"></script>

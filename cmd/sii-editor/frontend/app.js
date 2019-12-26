@@ -133,6 +133,7 @@ const app = new Vue({
     selectedProfile: null,
     selectedSave: null,
     showAutosaves: false,
+    showSaveModal: false,
     socket: null,
   },
 
@@ -140,15 +141,23 @@ const app = new Vue({
 
   methods: {
     attachTrailer() {
+      this.showSaveModal = true
       return axios.put(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}/set-trailer?ref=${this.save.attached_trailer}`)
-        .then(() => console.log('Trailer attached'))
-        .catch((err) => console.error(err))
+        .then(() => this.showToast('Success', 'Trailer attached', 'success'))
+        .catch((err) => {
+          this.showToast('Uhoh…', 'Could not attach trailer', 'danger')
+          console.error(err)
+        })
     },
 
     executeRepair(fixType) {
+      this.showSaveModal = true
       return axios.put(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}/fix?type=${fixType}`)
-        .then(() => console.log('Repair executed'))
-        .catch((err) => console.error(err))
+        .then(() => this.showToast('Success', 'Repair executed', 'success'))
+        .catch((err) => {
+          this.showToast('Uhoh…', 'Could not repair', 'danger')
+          console.error(err)
+        })
     },
 
     loadCargo() {
@@ -156,7 +165,10 @@ const app = new Vue({
         .then((resp) => {
           this.cargo = resp.data
         })
-        .catch((err) => console.error(err))
+        .catch((err) => {
+          this.showToast('Uhoh…', 'Could not load cargo defintion', 'danger')
+          console.error(err)
+        })
     },
 
     loadCompanies() {
@@ -164,7 +176,10 @@ const app = new Vue({
         .then((resp) => {
           this.companies = resp.data
         })
-        .catch((err) => console.error(err))
+        .catch((err) => {
+          this.showToast('Uhoh…', 'Could not load company defintion', 'danger')
+          console.error(err)
+        })
     },
 
     loadJobs() {
@@ -172,7 +187,10 @@ const app = new Vue({
         .then((resp) => {
           this.jobs = resp.data
         })
-        .catch((err) => console.error(err))
+        .catch((err) => {
+          this.showToast('Uhoh…', 'Could not load jobs', 'danger')
+          console.error(err)
+        })
     },
 
     loadNewestSave() {
@@ -184,7 +202,10 @@ const app = new Vue({
         .then((resp) => {
           this.profiles = resp.data
         })
-        .catch((err) => console.error(err))
+        .catch((err) => {
+          this.showToast('Uhoh…', 'Could not load profiles', 'danger')
+          console.error(err)
+        })
     },
 
     loadSave() {
@@ -192,12 +213,16 @@ const app = new Vue({
       this.loadCompanies()
 
       this.saveLoading = true
+      this.showSaveModal = false
       return axios.get(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}`)
         .then((resp) => {
           this.save = resp.data
           this.saveLoading = false
         })
-        .catch((err) => console.error(err))
+        .catch((err) => {
+          this.showToast('Uhoh…', 'Could not load save-game', 'danger')
+          console.error(err)
+        })
     },
 
     loadSaves() {
@@ -207,12 +232,10 @@ const app = new Vue({
         this.socket = null
       }
 
-      let loc = window.location
-      let new_uri = loc.protocol === 'https:' ? 'wss:' : 'ws:'
-      new_uri += '//' + loc.host
-
-      this.socket = new WebSocket(`${new_uri}/api/profiles/${this.selectedProfile}/saves?subscribe=true`)
-      this.socket.onclose = () => this.loadSaves()
+      const loc = window.location
+      let socketBase = `${loc.protocol === 'https:' ? 'wss:' : 'ws:'}//${loc.host}`
+      this.socket = new WebSocket(`${socketBase}/api/profiles/${this.selectedProfile}/saves?subscribe=true`)
+      this.socket.onclose = () => window.setTimeout(this.loadSaves, 1000) // Restart socket
       this.socket.onmessage = evt => {
         this.saves = JSON.parse(evt.data)
         if (this.autoLoad) {
@@ -246,9 +269,24 @@ const app = new Vue({
     },
 
     setEconomy(param, value) {
+      this.showSaveModal = true
       return axios.put(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}/economy?${param}=${value}`)
-        .then(() => console.log('Economy set'))
-        .catch((err) => console.error(err))
+        .then(() => this.showToast('Success', 'Economy updated', 'success'))
+        .catch((err) => {
+          this.showToast('Uhoh…', 'Could not update economy', 'danger')
+          console.error(err)
+        })
+    },
+
+    showToast(title, text, variant='info') {
+      this.$bvToast.toast(text, {
+        'appendToast': true,
+        'autoHideDelay': 2500,
+        'is-status': true,
+        'solid': true,
+        title,
+        variant,
+      })
     },
 
     validInt(v) {
