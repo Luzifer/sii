@@ -159,6 +159,70 @@
                 </b-input-group>
               </b-card>
             </b-col>
+
+            <b-col cols="12" xl="6" class="mb-3">
+              <b-card header="Create Job">
+                <b-form @submit.prevent="createJob">
+                  <b-form-group
+                    label="Source Company"
+                    label-for="source-company"
+                  >
+                    <b-form-select
+                      id="source-company"
+                      :options="companySelectItems"
+                      v-model="newJob.origin_reference"
+                      required
+                    ></b-form-select>
+                  </b-form-group>
+
+                  <b-form-group
+                    label="Target Company"
+                    label-for="target-company"
+                  >
+                    <b-form-select
+                      id="target-company"
+                      :options="companySelectItems"
+                      v-model="newJob.target_reference"
+                      required
+                    ></b-form-select>
+                  </b-form-group>
+
+                  <b-form-group
+                    label="Cargo"
+                    label-for="cargo"
+                  >
+                    <b-form-select
+                      id="cargo"
+                      :options="cargoSelectItems"
+                      v-model="newJob.cargo_reference"
+                      required
+                    ></b-form-select>
+                  </b-form-group>
+
+                  <b-form-group
+                    label="Weight (in tons)"
+                    label-for="weight"
+                  >
+                    <b-form-input
+                      id="weight"
+                      class="text-right"
+                      v-model="newJob.weight"
+                      type="number"
+                      required
+                      min="1"
+                      max="200"
+                    ></b-form-input>
+                  </b-form-group>
+
+                  <b-button
+                    type="submit"
+                  >
+                    Create Job
+                  </b-button>
+
+                </b-form>
+              </b-card>
+            </b-col>
           </b-row>
 
         </b-col>

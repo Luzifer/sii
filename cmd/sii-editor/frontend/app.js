@@ -7,6 +7,32 @@ const colorThresholds = {
 const app = new Vue({
 
   computed: {
+    cargoSelectItems() {
+      const result = []
+
+      for (const ref in this.cargo) {
+        result.push({
+          value: ref,
+          text: `${this.cargo[ref].name}`,
+        })
+      }
+
+      return result.sort((a, b) => a.text.localeCompare(b.text))
+    },
+
+    companySelectItems() {
+      const result = []
+
+      for (const ref in this.companies) {
+        result.push({
+          value: ref,
+          text: `${this.companies[ref].city}, ${this.companies[ref].name}`,
+        })
+      }
+
+      return result.sort((a, b) => a.text.localeCompare(b.text))
+    },
+
     dmgCargo() {
       return this.save && this.save.cargo_damage * 100 || 0
     },
@@ -126,6 +152,7 @@ const app = new Vue({
     cargo: {},
     companies: {},
     jobs: [],
+    newJob: { weight: 10 },
     profiles: {},
     save: null,
     saveLoading: false,
@@ -146,6 +173,38 @@ const app = new Vue({
         .then(() => this.showToast('Success', 'Trailer attached', 'success'))
         .catch((err) => {
           this.showToast('Uhoh…', 'Could not attach trailer', 'danger')
+          console.error(err)
+        })
+    },
+
+    createJob() {
+      if (!this.companies[this.newJob.origin_reference]) {
+        this.showToast('Uhm…', 'Source Company does not exist', 'danger')
+        return
+      }
+
+      if (!this.companies[this.newJob.target_reference]) {
+        this.showToast('Uhm…', 'Target Company does not exist', 'danger')
+        return
+      }
+
+      if (!this.cargo[this.newJob.cargo_reference]) {
+        this.showToast('Uhm…', 'Cargo does not exist', 'danger')
+        return
+      }
+
+      this.newJob.weight = parseInt(this.newJob.weight)
+      if (this.newJob.weight > 200) {
+        this.showToast('Uhm…', 'You want to pull more than 200 Tons of cargo?', 'danger')
+        return
+      }
+
+      this.showSaveModal = true
+
+      return axios.post(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}/jobs`, this.newJob)
+        .then(() => this.showToast('Success', 'Job created', 'success'))
+        .catch((err) => {
+          this.showToast('Uhoh…', 'Could not add job', 'danger')
           console.error(err)
         })
     },
