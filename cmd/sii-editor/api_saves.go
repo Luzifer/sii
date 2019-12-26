@@ -71,6 +71,35 @@ func handleAddJob(w http.ResponseWriter, r *http.Request) {
 	// Get cargo
 	cargo := baseGameUnit.BlockByName(job.CargoReference).(*sii.CargoData)
 
+	// Get trailer / truck from other jobs
+	var (
+		cTruck, cTV, cTD string
+		cTP              []sii.Placement
+	)
+
+	for _, jp := range company.JobOffer {
+		j := jp.Resolve().(*sii.JobOfferData)
+		if j.CompanyTruck.Target == "null" || j.TrailerVariant.Target == "null" || j.TrailerDefinition.Target == "null" || len(j.TrailerPlace) < 1 {
+			continue
+		}
+		cTruck, cTV, cTD = j.CompanyTruck.Target, j.TrailerVariant.Target, j.TrailerDefinition.Target
+		cTP = j.TrailerPlace
+		break
+	}
+
+	if cTP == nil {
+		// The company did not have any valid job offers to steal from, lets search globally
+		for _, jb := range game.BlocksByClass("job_offer_data") {
+			j := jb.(*sii.JobOfferData)
+			if j.CompanyTruck.Target == "null" || j.TrailerVariant.Target == "null" || j.TrailerDefinition.Target == "null" || len(j.TrailerPlace) < 1 {
+				continue
+			}
+			cTruck, cTV, cTD = j.CompanyTruck.Target, j.TrailerVariant.Target, j.TrailerDefinition.Target
+			cTP = j.TrailerPlace
+			break
+		}
+	}
+
 	jobID := "_nameless." + strconv.FormatInt(time.Now().Unix(), 16)
 	exTime := game.BlocksByClass("economy")[0].(*sii.Economy).GameTime + 300 // 300min = 5h
 	j := &sii.JobOfferData{
@@ -86,12 +115,12 @@ func handleAddJob(w http.ResponseWriter, r *http.Request) {
 		FillRatio: 1, // Dunno but other jobs have it at 1, so keep for now
 
 		// Dunno where this data comes from, steal it from previous first job
-		TrailerPlace: company.JobOffer[0].Resolve().(*sii.JobOfferData).TrailerPlace,
+		TrailerPlace: cTP,
 
 		// Too lazy to implement, just steal it too
-		CompanyTruck:      company.JobOffer[0].Resolve().(*sii.JobOfferData).CompanyTruck,
-		TrailerVariant:    company.JobOffer[0].Resolve().(*sii.JobOfferData).TrailerVariant,
-		TrailerDefinition: company.JobOffer[0].Resolve().(*sii.JobOfferData).TrailerDefinition,
+		CompanyTruck:      sii.Ptr{Target: cTruck},
+		TrailerVariant:    sii.Ptr{Target: cTV},
+		TrailerDefinition: sii.Ptr{Target: cTD},
 	}
 	j.Init("", jobID)
 
