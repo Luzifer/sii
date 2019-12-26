@@ -63,8 +63,13 @@ func handleListCompanies(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		cName := baseGameUnit.BlockByName(c.CityPtr().Target).(*sii.CityData).CityNameLocalized
+		if strings.HasPrefix(cName, "@@") {
+			cName = locale.GetTranslation(cName)
+		}
+
 		result[c.Name()] = commCompany{
-			City: locale.GetTranslation(baseGameUnit.BlockByName(c.CityPtr().Target).(*sii.CityData).CityNameLocalized),
+			City: cName,
 			Name: baseGameUnit.BlockByName(c.PermanentData.Target).(*sii.CompanyPermanent).CompanyName,
 		}
 	}
