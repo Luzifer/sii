@@ -88,7 +88,6 @@ func main() {
 		log.WithError(err).Fatal("Unable to load translations")
 	}
 	log.Info("Translations loaded")
-	log.Printf("%#v", locale)
 
 	log.WithField("addr", cfg.Listen).Info("Starting API server...")
 

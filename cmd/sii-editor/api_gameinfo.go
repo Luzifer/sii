@@ -64,7 +64,7 @@ func handleListCompanies(w http.ResponseWriter, r *http.Request) {
 		}
 
 		result[c.Name()] = commCompany{
-			City: baseGameUnit.BlockByName(c.CityPtr().Target).(*sii.CityData).CityName,
+			City: locale.GetTranslation(baseGameUnit.BlockByName(c.CityPtr().Target).(*sii.CityData).CityNameLocalized),
 			Name: baseGameUnit.BlockByName(c.PermanentData.Target).(*sii.CompanyPermanent).CompanyName,
 		}
 	}
