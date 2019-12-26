@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	singleLineValue = `^\s*%s\s?:\s?(.+)$`
-	arrayLineValue  = `^\s*%s(\[([0-9]*)\])?\s?:\s?(.+)$`
+	singleLineValue = `^\s*%s\s?:\s?([^#]+)(?:$|#)`
+	arrayLineValue  = `^\s*%s(\[([0-9]*)\])?\s?:\s?([^#]+)(?:$|#)`
 )
 
 func genericUnmarshal(in []byte, out interface{}, unit *Unit) error {
@@ -376,7 +376,11 @@ func getArrayValues(in []byte, name string) ([][]byte, error) {
 			}
 
 			if len(grp[2]) == 0 {
-				out = append(out, grp[3])
+				tb := make([]byte, len(grp[3]))
+				for i, b := range grp[3] {
+					tb[i] = b
+				}
+				out = append(out, bytes.TrimSpace(tb))
 				continue
 			}
 
@@ -386,9 +390,11 @@ func getArrayValues(in []byte, name string) ([][]byte, error) {
 			}
 
 			out[idx] = make([]byte, len(grp[3]))
+			tb := make([]byte, len(grp[3]))
 			for i, b := range grp[3] {
-				out[idx][i] = b
+				tb[i] = b
 			}
+			out[idx] = bytes.TrimSpace(tb)
 		}
 	}
 
