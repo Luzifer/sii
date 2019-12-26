@@ -7,7 +7,7 @@ replace github.com/Luzifer/sii => ../../
 require (
 	github.com/Luzifer/go_helpers/v2 v2.9.1
 	github.com/Luzifer/rconfig/v2 v2.2.1
-	github.com/Luzifer/scs-extract v0.1.0
+	github.com/Luzifer/scs-extract v0.1.1-0.20191226001718-17f71578850d
 	github.com/Luzifer/sii v0.0.0-00010101000000-000000000000
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/gorilla/mux v1.7.3
