@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	singleLineValue = `^\s*%s\s?:\s?([^#]+)(?:$|#)`
-	arrayLineValue  = `^\s*%s(\[([0-9]*)\])?\s?:\s?([^#]+)(?:$|#)`
+	singleLineValue = `^\s*%s\s?:\s?([^#]+?)(?:$|#|//)`
+	arrayLineValue  = `^\s*%s(\[([0-9]*)\])?\s?:\s?([^#]+?)(?:$|#|//)`
 )
 
 func genericUnmarshal(in []byte, out interface{}, unit *Unit) error {
