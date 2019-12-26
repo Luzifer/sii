@@ -202,7 +202,10 @@ const app = new Vue({
       this.showSaveModal = true
 
       return axios.post(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}/jobs`, this.newJob)
-        .then(() => this.showToast('Success', 'Job created', 'success'))
+        .then(() => {
+          this.showToast('Success', 'Job created', 'success')
+          this.newJob = {weight: 10} // Reset job
+        })
         .catch((err) => {
           this.showToast('Uhoh…', 'Could not add job', 'danger')
           console.error(err)
