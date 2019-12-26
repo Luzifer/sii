@@ -1,51 +1,39 @@
 package main
 
 import (
-	"os"
 	"path"
-	"strings"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
+)
+
+const (
+	pathETS2 = "ets2"
+	pathATS  = "ats"
 )
 
 var errPathNotFound = errors.New("Could not find path")
 
-func findProfilePath() (string, error) {
-	homedir, err := os.UserHomeDir()
+func expandHomedir(dir string) string {
+	s, err := homedir.Expand(dir)
 	if err != nil {
-		return "", errors.Wrap(err, "Unable to get users homedir")
+		log.WithError(err).Error("Unable to expand home path")
+		return dir
 	}
-
-	for _, hintPath := range profilePaths {
-		hintPath = strings.ReplaceAll(hintPath, "~", homedir)
-		if s, err := os.Stat(hintPath); err == nil {
-			if s.IsDir() {
-				return hintPath, nil
-			}
-		}
-	}
-
-	return "", errPathNotFound
+	return s
 }
 
-func findGamePath() (string, error) {
-	homedir, err := os.UserHomeDir()
-	if err != nil {
-		return "", errors.Wrap(err, "Unable to get users homedir")
-	}
+func getGamePath() string {
+	return expandHomedir(userConfig.GameDirectories[cfg.Game])
+}
 
-	for _, hintPath := range gamePaths {
-		hintPath = strings.ReplaceAll(hintPath, "~", homedir)
-		if _, err := os.Stat(path.Join(hintPath, "def.scs")); err == nil {
-			return hintPath, nil
-		}
-	}
-
-	return "", errPathNotFound
+func getProfilesPath() string {
+	return expandHomedir(userConfig.ProfileDirectories[cfg.Game])
 }
 
 func getProfilePath(profile string) string {
-	return path.Join(userConfig.ProfileDirectory, profile)
+	return path.Join(getProfilesPath(), profile)
 }
 
 func getProfileInfoPath(profile string) string {

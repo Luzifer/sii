@@ -85,18 +85,20 @@ func commSaveDetailsFromUnit(unit *sii.Unit) (out commSaveDetails, err error) {
 		trailer = v
 	}
 
-	for _, pb := range truck.Accessories {
-		var wear float32
-		if v, ok := pb.Resolve().(*sii.VehicleAccessory); ok {
-			wear = v.Wear
-		}
+	if truck != nil {
+		for _, pb := range truck.Accessories {
+			var wear float32
+			if v, ok := pb.Resolve().(*sii.VehicleAccessory); ok {
+				wear = v.Wear
+			}
 
-		if v, ok := pb.Resolve().(*sii.VehicleWheelAccessory); ok {
-			wear = v.Wear
-		}
+			if v, ok := pb.Resolve().(*sii.VehicleWheelAccessory); ok {
+				wear = v.Wear
+			}
 
-		if wear > out.TruckWear {
-			out.TruckWear = wear
+			if wear > out.TruckWear {
+				out.TruckWear = wear
+			}
 		}
 	}
 

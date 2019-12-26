@@ -10,22 +10,20 @@ import (
 var errUserConfigNotFound = errors.New("User config not found")
 
 type configFile struct {
-	GameDirectory    string `yaml:"game_directory"`
-	ProfileDirectory string `yaml:"profile_directory"`
+	GameDirectories    map[string]string `yaml:"game_directories"`
+	ProfileDirectories map[string]string `yaml:"profile_directories"`
 }
 
 func (c *configFile) loadDefaults() error {
-	var err error
-
-	if c.GameDirectory == "" {
-		if c.GameDirectory, err = findGamePath(); err != nil {
-			return errors.Wrap(err, "Unable to find game directory")
+	for k, dv := range gamePaths {
+		if c.GameDirectories[k] == "" {
+			c.GameDirectories[k] = dv
 		}
 	}
 
-	if c.ProfileDirectory == "" {
-		if c.ProfileDirectory, err = findProfilePath(); err != nil {
-			return errors.Wrap(err, "Unable to find profile directory")
+	for k, dv := range profilePaths {
+		if c.ProfileDirectories[k] == "" {
+			c.ProfileDirectories[k] = dv
 		}
 	}
 
@@ -33,7 +31,10 @@ func (c *configFile) loadDefaults() error {
 }
 
 func loadUserConfig(p string) (*configFile, error) {
-	var c = &configFile{}
+	var c = &configFile{
+		GameDirectories:    map[string]string{},
+		ProfileDirectories: map[string]string{},
+	}
 
 	if _, err := os.Stat(p); err != nil {
 		if os.IsNotExist(err) {

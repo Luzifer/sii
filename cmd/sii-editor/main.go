@@ -19,6 +19,7 @@ var (
 	cfg = struct {
 		Config         string `flag:"config,c" vardefault:"config" description:"Optional configuration file"`
 		DecryptKey     string `flag:"decrypt-key" default:"" description:"Hex formated decryption key" validate:"nonzero"`
+		Game           string `flag:"game,g" default:"ets2" description:"Which game to manage (ets2 / ats)"`
 		Listen         string `flag:"listen" default:":3000" description:"Port/IP to listen on"`
 		LogLevel       string `flag:"log-level" default:"info" description:"Log level (debug, info, warn, error, fatal)"`
 		VersionAndExit bool   `flag:"version" default:"false" description:"Prints current version and exits"`
@@ -87,7 +88,7 @@ func main() {
 	if locale, err = getLocale(defaultTranslation); err != nil {
 		log.WithError(err).Fatal("Unable to load translations")
 	}
-	log.Info("Translations loaded")
+	log.WithField("translations", len(locale.Keys)).Info("Translations loaded")
 
 	log.WithField("addr", cfg.Listen).Info("Starting API server...")
 

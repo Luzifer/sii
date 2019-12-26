@@ -23,7 +23,7 @@ func readBaseData() (*sii.Unit, error) {
 	unitData.WriteString("SiiNunit\n{\n")
 
 	// Collect all available units from game files
-	entries, err := ioutil.ReadDir(userConfig.GameDirectory)
+	entries, err := ioutil.ReadDir(getGamePath())
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to list game-directory")
 	}
@@ -34,7 +34,7 @@ func readBaseData() (*sii.Unit, error) {
 			continue
 		}
 
-		fPath := path.Join(userConfig.GameDirectory, entry.Name())
+		fPath := path.Join(getGamePath(), entry.Name())
 
 		stat, err := os.Stat(fPath)
 		if err != nil {

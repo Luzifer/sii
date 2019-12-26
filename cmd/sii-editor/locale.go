@@ -13,7 +13,7 @@ import (
 )
 
 func getLocale(locale string) (*sii.LocalizationDB, error) {
-	fPath := path.Join(userConfig.GameDirectory, "locale.scs")
+	fPath := path.Join(getGamePath(), "locale.scs")
 
 	stat, err := os.Stat(fPath)
 	if err != nil {

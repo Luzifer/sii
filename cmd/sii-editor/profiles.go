@@ -46,7 +46,7 @@ func commProfileInfoFromUserProfile(p *sii.UserProfile) commProfileInfo {
 }
 
 func listSaves(profile string) (map[string]commSaveInfo, error) {
-	entries, err := ioutil.ReadDir(path.Join(userConfig.ProfileDirectory, profile, "save"))
+	entries, err := ioutil.ReadDir(path.Join(getProfilePath(profile), "save"))
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to list saves")
 	}
@@ -86,7 +86,7 @@ func listSaves(profile string) (map[string]commSaveInfo, error) {
 }
 
 func listProfiles() (map[string]commProfileInfo, error) {
-	entries, err := ioutil.ReadDir(userConfig.ProfileDirectory)
+	entries, err := ioutil.ReadDir(getProfilesPath())
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to list profiles")
 	}
