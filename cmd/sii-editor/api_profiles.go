@@ -54,7 +54,7 @@ func handleGetProfileSaves(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 
 	if err = conn.WriteJSON(saves); err != nil {
-		log.WithError(err).Error("Unable to send saves list")
+		log.WithError(err).Debug("Unable to send saves list")
 		return
 	}
 
