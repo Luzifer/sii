@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/Luzifer/sii"
 	"github.com/gorilla/mux"
@@ -28,8 +29,14 @@ func handleListCargo(w http.ResponseWriter, r *http.Request) {
 
 	for _, b := range baseGameUnit.BlocksByClass("cargo_data") {
 		c := b.(*sii.CargoData)
+		var cName = c.CargoName
+		if strings.HasPrefix(cName, "@@") {
+			// Localization string, translate
+			cName = locale.GetTranslation(cName)
+		}
+
 		result[c.Name()] = commCargo{
-			Name: c.CargoName,
+			Name: cName,
 			Mass: c.Mass,
 		}
 	}

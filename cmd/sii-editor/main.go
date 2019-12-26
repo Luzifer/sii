@@ -13,6 +13,8 @@ import (
 	"github.com/Luzifer/sii"
 )
 
+const defaultTranslation = "en_us"
+
 var (
 	cfg = struct {
 		Config         string `flag:"config,c" vardefault:"config" description:"Optional configuration file"`
@@ -23,6 +25,7 @@ var (
 	}{}
 
 	baseGameUnit *sii.Unit
+	locale       *sii.LocalizationDB
 	router       = mux.NewRouter()
 	userConfig   *configFile
 
@@ -78,6 +81,14 @@ func main() {
 		"cities":    len(baseGameUnit.BlocksByClass("city_data")),
 		"companies": len(baseGameUnit.BlocksByClass("company_permanent")),
 	}).Info("Game base data loaded")
+
+	log.Info("Loading translations...")
+	// TODO: Make user definable
+	if locale, err = getLocale(defaultTranslation); err != nil {
+		log.WithError(err).Fatal("Unable to load translations")
+	}
+	log.Info("Translations loaded")
+	log.Printf("%#v", locale)
 
 	log.WithField("addr", cfg.Listen).Info("Starting API server...")
 
