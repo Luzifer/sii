@@ -4,7 +4,7 @@ const colorThresholds = {
   danger: 50,
 }
 
-const app = new Vue({
+window.app = new Vue({
 
   computed: {
     cargoSelectItems() {
@@ -105,7 +105,7 @@ const app = new Vue({
     sortedSaves() {
       const saves = []
 
-      for (let id in this.saves) {
+      for (const id in this.saves) {
         const name = this.saves[id].name !== '' ? this.saves[id].name : this.saveIDToName(id)
         saves.push({
           ...this.saves[id],
@@ -114,14 +114,14 @@ const app = new Vue({
         })
       }
 
-      return saves.sort((b, a) => { return new Date(a.save_time) - new Date(b.save_time) })
+      return saves.sort((b, a) => new Date(a.save_time) - new Date(b.save_time))
     },
 
     truckClass() {
-      let classes = ['dmg']
+      const classes = ['dmg']
 
-      let classSelector = (prefix, value) => {
-        for (let t of ['danger', 'warn', 'ok']) {
+      const classSelector = (prefix, value) => {
+        for (const t of ['danger', 'warn', 'ok']) {
           if (value >= colorThresholds[t]) {
             return `${prefix}${t}`
           }
@@ -171,7 +171,7 @@ const app = new Vue({
       this.showSaveModal = true
       return axios.put(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}/set-trailer?ref=${this.save.attached_trailer}`)
         .then(() => this.showToast('Success', 'Trailer attached', 'success'))
-        .catch((err) => {
+        .catch(err => {
           this.showToast('Uhoh…', 'Could not attach trailer', 'danger')
           console.error(err)
         })
@@ -204,9 +204,9 @@ const app = new Vue({
       return axios.post(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}/jobs`, this.newJob)
         .then(() => {
           this.showToast('Success', 'Job created', 'success')
-          this.newJob = {weight: 10} // Reset job
+          this.newJob = { weight: 10 } // Reset job
         })
-        .catch((err) => {
+        .catch(err => {
           this.showToast('Uhoh…', 'Could not add job', 'danger')
           console.error(err)
         })
@@ -216,7 +216,7 @@ const app = new Vue({
       this.showSaveModal = true
       return axios.put(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}/fix?type=${fixType}`)
         .then(() => this.showToast('Success', 'Repair executed', 'success'))
-        .catch((err) => {
+        .catch(err => {
           this.showToast('Uhoh…', 'Could not repair', 'danger')
           console.error(err)
         })
@@ -224,10 +224,10 @@ const app = new Vue({
 
     loadCargo() {
       return axios.get(`/api/gameinfo/cargo`)
-        .then((resp) => {
+        .then(resp => {
           this.cargo = resp.data
         })
-        .catch((err) => {
+        .catch(err => {
           this.showToast('Uhoh…', 'Could not load cargo defintion', 'danger')
           console.error(err)
         })
@@ -235,10 +235,10 @@ const app = new Vue({
 
     loadCompanies() {
       return axios.get(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}/companies`)
-        .then((resp) => {
+        .then(resp => {
           this.companies = resp.data
         })
-        .catch((err) => {
+        .catch(err => {
           this.showToast('Uhoh…', 'Could not load company defintion', 'danger')
           console.error(err)
         })
@@ -246,10 +246,10 @@ const app = new Vue({
 
     loadJobs() {
       return axios.get(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}/jobs`)
-        .then((resp) => {
+        .then(resp => {
           this.jobs = resp.data
         })
-        .catch((err) => {
+        .catch(err => {
           this.showToast('Uhoh…', 'Could not load jobs', 'danger')
           console.error(err)
         })
@@ -261,10 +261,10 @@ const app = new Vue({
 
     loadProfiles() {
       return axios.get('/api/profiles')
-        .then((resp) => {
+        .then(resp => {
           this.profiles = resp.data
         })
-        .catch((err) => {
+        .catch(err => {
           this.showToast('Uhoh…', 'Could not load profiles', 'danger')
           console.error(err)
         })
@@ -277,11 +277,11 @@ const app = new Vue({
       this.saveLoading = true
       this.showSaveModal = false
       return axios.get(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}`)
-        .then((resp) => {
+        .then(resp => {
           this.save = resp.data
           this.saveLoading = false
         })
-        .catch((err) => {
+        .catch(err => {
           this.showToast('Uhoh…', 'Could not load save-game', 'danger')
           console.error(err)
         })
@@ -295,7 +295,7 @@ const app = new Vue({
       }
 
       const loc = window.location
-      let socketBase = `${loc.protocol === 'https:' ? 'wss:' : 'ws:'}//${loc.host}`
+      const socketBase = `${loc.protocol === 'https:' ? 'wss:' : 'ws:'}//${loc.host}`
       this.socket = new WebSocket(`${socketBase}/api/profiles/${this.selectedProfile}/saves?subscribe=true`)
       this.socket.onclose = () => window.setTimeout(this.loadSaves, 1000) // Restart socket
       this.socket.onmessage = evt => {
@@ -322,7 +322,7 @@ const app = new Vue({
       this.selectedProfile = profileID
     },
 
-    selectSave(saveID, evt) {
+    selectSave(saveID) {
       if (this.selectedSave === saveID) {
         this.loadSave()
       } else {
@@ -334,13 +334,13 @@ const app = new Vue({
       this.showSaveModal = true
       return axios.put(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}/economy?${param}=${value}`)
         .then(() => this.showToast('Success', 'Economy updated', 'success'))
-        .catch((err) => {
+        .catch(err => {
           this.showToast('Uhoh…', 'Could not update economy', 'danger')
           console.error(err)
         })
     },
 
-    showToast(title, text, variant='info') {
+    showToast(title, text, variant = 'info') {
       this.$bvToast.toast(text, {
         'appendToast': true,
         'autoHideDelay': 2500,
@@ -352,7 +352,7 @@ const app = new Vue({
     },
 
     validInt(v) {
-      return 0 <= v && v <= 2147483647
+      return v >= 0 && v <= 2147483647
     },
   },
 

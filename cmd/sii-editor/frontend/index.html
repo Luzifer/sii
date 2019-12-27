@@ -45,7 +45,7 @@
             <b-list-group-item
               button
               :active="selectedSave === save.id"
-              @click="evt => selectSave(save.id, evt)"
+              @click="selectSave(save.id)"
               v-for="save in sortedSaves"
               v-if="save.name !== 'Autosave' || showAutosaves || selectedSave === save.id"
               :key="save.id"
