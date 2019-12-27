@@ -37,5 +37,5 @@ func (l LocalizationDB) GetTranslation(key string) string {
 		}
 	}
 
-	return ""
+	return key
 }
