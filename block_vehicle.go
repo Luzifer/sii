@@ -10,8 +10,8 @@ type Vehicle struct {
 	UserMirrorRot             [][4]float32 `sii:"user_mirror_rot"`
 	UserHeadOffset            [3]float32   `sii:"user_head_offset"`
 	UserFOV                   int64        `sii:"user_fov"`
-	UserWheelUpDown           int64        `sii:"user_wheel_up_down"`
-	UserWheelFrontBack        int64        `sii:"user_wheel_front_back"`
+	UserWheelUpDown           float32      `sii:"user_wheel_up_down"`
+	UserWheelFrontBack        float32      `sii:"user_wheel_front_back"`
 	UserMouseLeftRightDefault int64        `sii:"user_mouse_left_right_default"`
 	UserMouseUpDownDefault    int64        `sii:"user_mouse_up_down_default"`
 	Accessories               []Ptr        `sii:"accessories"`
