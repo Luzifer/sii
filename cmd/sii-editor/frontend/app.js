@@ -275,7 +275,6 @@ window.app = new Vue({
       this.loadCompanies()
 
       this.saveLoading = true
-      this.showSaveModal = false
       return axios.get(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}`)
         .then(resp => {
           this.save = resp.data
@@ -300,6 +299,8 @@ window.app = new Vue({
       this.socket.onclose = () => window.setTimeout(this.loadSaves, 1000) // Restart socket
       this.socket.onmessage = evt => {
         this.saves = JSON.parse(evt.data)
+        this.showSaveModal = false
+
         if (this.autoLoad) {
           this.loadNewestSave()
         }
