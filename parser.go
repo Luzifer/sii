@@ -67,7 +67,7 @@ func ParseSIIPlainFile(r io.Reader) (*Unit, error) {
 
 			return nil, errors.New("Unexpected closing braces")
 
-		case blockStartRegex.MatchString(line) && !inBlock:
+		case !inBlock && blockStartRegex.MatchString(line):
 			if !inUnit {
 				return nil, errors.New("Unexpected block start outside unit")
 			}
