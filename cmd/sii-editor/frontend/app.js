@@ -205,7 +205,12 @@ window.app = new Vue({
       }
 
       this.plannedRoute.push(this.newJob)
-      this.newJob = { weight: 10 } // Reset job
+
+      // Reset job
+      this.newJob = {
+        origin_reference: this.newJob.target_reference, // Automatically set origin to last target for route creation
+        weight: 10
+      }
     },
 
     createRoute() {
