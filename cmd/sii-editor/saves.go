@@ -147,7 +147,7 @@ func commSaveDetailsFromUnit(unit *sii.Unit) (out commSaveDetails, err error) {
 	return out, nil
 }
 
-func addJobToGame(game *sii.Unit, job commSaveJob) error {
+func addJobToGame(game *sii.Unit, job commSaveJob, routePartID int) error {
 	// Get company
 	company := game.BlockByName(job.OriginReference).(*sii.Company)
 	// Get cargo
@@ -189,7 +189,11 @@ func addJobToGame(game *sii.Unit, job commSaveJob) error {
 		cargoCount = 1
 	}
 
-	jobID := "_nameless." + strconv.FormatInt(time.Now().Unix(), 16)
+	jobID := strings.Join([]string{
+		"_nameless",
+		strconv.FormatInt(time.Now().Unix(), 16),
+		strconv.FormatInt(int64(routePartID), 16),
+	}, ".")
 	exTime := game.BlocksByClass("economy")[0].(*sii.Economy).GameTime + 300 // 300min = 5h
 	j := &sii.JobOfferData{
 		// User requested job data

@@ -26,7 +26,7 @@ window.app = new Vue({
       for (const ref in this.companies) {
         result.push({
           value: ref,
-          text: `${this.companies[ref].city}, ${this.companies[ref].name}`,
+          text: this.companyNameFromReference(ref),
         })
       }
 
@@ -153,6 +153,7 @@ window.app = new Vue({
     companies: {},
     jobs: [],
     newJob: { weight: 10 },
+    plannedRoute: [],
     profiles: {},
     save: null,
     saveLoading: false,
@@ -177,6 +178,10 @@ window.app = new Vue({
         })
     },
 
+    companyNameFromReference(ref) {
+      return `${this.companies[ref].city}, ${this.companies[ref].name}`
+    },
+
     createJob() {
       if (!this.companies[this.newJob.origin_reference]) {
         this.showToast('Uhm…', 'Source Company does not exist', 'danger')
@@ -199,15 +204,19 @@ window.app = new Vue({
         return
       }
 
-      this.showSaveModal = true
+      this.plannedRoute.push(this.newJob)
+      this.newJob = { weight: 10 } // Reset job
+    },
 
-      return axios.post(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}/jobs`, [this.newJob])
+    createRoute() {
+      this.showSaveModal = true
+      return axios.post(`/api/profiles/${this.selectedProfile}/saves/${this.selectedSave}/jobs`, this.plannedRoute)
         .then(() => {
-          this.showToast('Success', 'Job created', 'success')
-          this.newJob = { weight: 10 } // Reset job
+          this.showToast('Success', 'Route created', 'success')
+          this.plannedRoute = []
         })
         .catch(err => {
-          this.showToast('Uhoh…', 'Could not add job', 'danger')
+          this.showToast('Uhoh…', 'Could not add route', 'danger')
           console.error(err)
         })
     },
@@ -228,9 +237,9 @@ window.app = new Vue({
           this.cargo = resp.data
         })
         .catch(err => {
-          this.showToast('Uhoh…', 'Could not load cargo defintion', 'danger')
-          console.error(err)
-        })
+          this.showToast('Uhoh…', 'Could not load cargo defintion', 'danger'
+            console.error(err)
+          })
     },
 
     loadCompanies() {
@@ -305,6 +314,21 @@ window.app = new Vue({
           this.loadNewestSave()
         }
       }
+    },
+
+    removeJob(idx) {
+      if (idx < 0 || idx > this.plannedRoute.length - 1) {
+        return
+      }
+
+      let newRoute = []
+      for (const i in this.plannedRoute) {
+        if (parseInt(i) !== idx) {
+          newRoute.push(this.plannedRoute[i])
+        }
+      }
+
+      this.plannedRoute = newRoute
     },
 
     saveIDToName(id) {

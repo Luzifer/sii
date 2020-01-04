@@ -48,7 +48,7 @@ func handleAddJob(w http.ResponseWriter, r *http.Request) {
 	info.SaveName = storeSaveName
 	info.FileTime = time.Now().Unix()
 
-	for _, job := range jobs {
+	for i, job := range jobs {
 		// Set urgency if it isn't
 		if job.Urgency == nil {
 			u := int64(0)
@@ -68,7 +68,7 @@ func handleAddJob(w http.ResponseWriter, r *http.Request) {
 			job.Distance = 100 // If the user did not provide distance use 100km as a default
 		}
 
-		if err = addJobToGame(game, job); err != nil {
+		if err = addJobToGame(game, job, i); err != nil {
 			apiGenericError(w, http.StatusInternalServerError, errors.Wrap(err, "Unable to add job"))
 			return
 		}
