@@ -3,6 +3,9 @@ package main
 import (
 	"os"
 	"path"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/Luzifer/sii"
 	"github.com/pkg/errors"
@@ -142,6 +145,83 @@ func commSaveDetailsFromUnit(unit *sii.Unit) (out commSaveDetails, err error) {
 	}
 
 	return out, nil
+}
+
+func addJobToGame(game *sii.Unit, job commSaveJob, routePartID int) error {
+	// Get company
+	company := game.BlockByName(job.OriginReference).(*sii.Company)
+	// Get cargo
+	cargo := baseGameUnit.BlockByName(job.CargoReference).(*sii.CargoData)
+
+	// Get trailer / truck from other jobs
+	var cTruck, cTV, cTD string
+
+	for _, jp := range company.JobOffer {
+		j := jp.Resolve().(*sii.JobOfferData)
+		if j.CompanyTruck.IsNull() || j.TrailerVariant.IsNull() || j.TrailerDefinition.IsNull() {
+			continue
+		}
+		cTruck, cTV, cTD = j.CompanyTruck.Target, j.TrailerVariant.Target, j.TrailerDefinition.Target
+		break
+	}
+
+	if cTruck == "" || cTV == "" || cTD == "" {
+		// The company did not have any valid job offers to steal from, lets search globally
+		for _, jb := range game.BlocksByClass("job_offer_data") {
+			j := jb.(*sii.JobOfferData)
+			if j.CompanyTruck.IsNull() || j.TrailerVariant.IsNull() || j.TrailerDefinition.IsNull() {
+				continue
+			}
+			cTruck, cTV, cTD = j.CompanyTruck.Target, j.TrailerVariant.Target, j.TrailerDefinition.Target
+			break
+		}
+	}
+
+	if cTruck == "" || cTV == "" || cTD == "" {
+		// Even in global jobs there was no proper job, this savegame looks broken
+		return errors.New("Was not able to find suitable trailer definition")
+	}
+
+	cargoCount := int64(job.Weight / cargo.Mass)
+	if cargoCount < 1 {
+		// Ensure cargo is transported (can happen if only small weight is
+		// requested and one unit weighs more than requested cargo)
+		cargoCount = 1
+	}
+
+	jobID := strings.Join([]string{
+		"_nameless",
+		strconv.FormatInt(time.Now().Unix(), 16),
+		strconv.FormatInt(int64(routePartID), 16),
+	}, ".")
+	exTime := game.BlocksByClass("economy")[0].(*sii.Economy).GameTime + 300 // 300min = 5h
+	j := &sii.JobOfferData{
+		// User requested job data
+		Target:             strings.TrimPrefix(job.TargetReference, "company.volatile."),
+		ExpirationTime:     &exTime,
+		Urgency:            job.Urgency,
+		Cargo:              sii.Ptr{Target: job.CargoReference},
+		UnitsCount:         cargoCount,
+		ShortestDistanceKM: job.Distance,
+
+		// Some static data
+		FillRatio: 1, // Dunno but other jobs have it at 1, so keep for now
+
+		// Dunno where this data comes from, it works without it and gets own ones
+		TrailerPlace: []sii.Placement{},
+
+		// Too lazy to implement, just steal it too
+		CompanyTruck:      sii.Ptr{Target: cTruck},
+		TrailerVariant:    sii.Ptr{Target: cTV},
+		TrailerDefinition: sii.Ptr{Target: cTD},
+	}
+	j.Init("", jobID)
+
+	// Add the new job to the game
+	game.Entries = append(game.Entries, j)
+	company.JobOffer = append([]sii.Ptr{{Target: j.Name()}}, company.JobOffer...)
+
+	return nil
 }
 
 func fixPlayerTruck(unit *sii.Unit, fixType string) error {

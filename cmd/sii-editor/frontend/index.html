@@ -161,7 +161,7 @@
             </b-col>
 
             <b-col cols="12" xl="6" class="mb-3">
-              <b-card header="Create Job">
+              <b-card header="Add Job to Route">
                 <b-form @submit.prevent="createJob">
                   <b-form-group
                     label="Source Company"
@@ -214,15 +214,57 @@
                     ></b-form-input>
                   </b-form-group>
 
-                  <b-button
-                    type="submit"
-                  >
-                    Create Job
-                  </b-button>
+                  <div class="text-center">
+                    <b-btn
+                      type="submit"
+                    >
+                      Add Job
+                    </b-btn>
+                  </div>
 
                 </b-form>
               </b-card>
             </b-col>
+
+            <b-col cols="12" xl="6" class="mb-3">
+              <b-card header="Planned route">
+                <b-list-group class="mb-2" flush v-if="plannedRoute.length > 0">
+                  <b-list-group-item
+                    v-for="(job, idx) in plannedRoute"
+                    :key="idx"
+                  >
+                    <div class="d-flex w-100 justify-content-between">
+                      <span>
+                        <span>
+                          <i class="fa fa-fw fa-box mr-1"></i>
+                          <strong>{{ job.weight }}t {{ cargo[job.cargo_reference].name }}</strong>
+                        </span><br>
+                        <small>
+                          From <strong>{{ companyNameFromReference(job.origin_reference) }}</strong><br>
+                          To <strong>{{ companyNameFromReference(job.target_reference) }}</strong>
+                        </small>
+                      </span>
+                      <b-btn
+                        @click="removeJob(idx)"
+                        variant="danger"
+                      >
+                        <i class="fa fa-fw fa-trash"></i>
+                      </b-btn>
+                    </div>
+                  </b-list-group-item>
+                </b-list-group>
+
+                <div class="text-center">
+                  <b-btn
+                    @click="createRoute"
+                    :disabled="plannedRoute.length == 0"
+                  >
+                    Create Jobs for Route
+                  </b-btn>
+                </div>
+              </b-card>
+            </b-col>
+
           </b-row>
 
         </b-col>
