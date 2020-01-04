@@ -30,11 +30,11 @@ func init() {
 
 func handleAddJob(w http.ResponseWriter, r *http.Request) {
 	var (
-		job  commSaveJob
+		jobs []commSaveJob
 		vars = mux.Vars(r)
 	)
 
-	if err := json.NewDecoder(r.Body).Decode(&job); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&jobs); err != nil {
 		apiGenericError(w, http.StatusBadRequest, errors.Wrap(err, "Unable to decode input data"))
 		return
 	}
@@ -48,81 +48,31 @@ func handleAddJob(w http.ResponseWriter, r *http.Request) {
 	info.SaveName = storeSaveName
 	info.FileTime = time.Now().Unix()
 
-	// Set urgency if it isn't
-	if job.Urgency == nil {
-		u := int64(0)
-		job.Urgency = &u
-	}
-
-	if job.Weight == 0 {
-		job.Weight = 10000 // 10 tons as a default
-	}
-
-	if job.Weight < 100 {
-		// User clearly did't want 54kg but 54 tons! (If not: screw em)
-		job.Weight *= 1000
-	}
-
-	if job.Distance == 0 {
-		job.Distance = 100 // If the user did not provide distance use 100km as a default
-	}
-
-	// Get company
-	company := game.BlockByName(job.OriginReference).(*sii.Company)
-	// Get cargo
-	cargo := baseGameUnit.BlockByName(job.CargoReference).(*sii.CargoData)
-
-	// Get trailer / truck from other jobs
-	var cTruck, cTV, cTD string
-
-	for _, jp := range company.JobOffer {
-		j := jp.Resolve().(*sii.JobOfferData)
-		if j.CompanyTruck.IsNull() || j.TrailerVariant.IsNull() || j.TrailerDefinition.IsNull() {
-			continue
+	for _, job := range jobs {
+		// Set urgency if it isn't
+		if job.Urgency == nil {
+			u := int64(0)
+			job.Urgency = &u
 		}
-		cTruck, cTV, cTD = j.CompanyTruck.Target, j.TrailerVariant.Target, j.TrailerDefinition.Target
-		break
-	}
 
-	if cTruck == "" || cTV == "" || cTD == "" {
-		// The company did not have any valid job offers to steal from, lets search globally
-		for _, jb := range game.BlocksByClass("job_offer_data") {
-			j := jb.(*sii.JobOfferData)
-			if j.CompanyTruck.IsNull() || j.TrailerVariant.IsNull() || j.TrailerDefinition.IsNull() {
-				continue
-			}
-			cTruck, cTV, cTD = j.CompanyTruck.Target, j.TrailerVariant.Target, j.TrailerDefinition.Target
-			break
+		if job.Weight == 0 {
+			job.Weight = 10000 // 10 tons as a default
+		}
+
+		if job.Weight < 100 {
+			// User clearly did't want 54kg but 54 tons! (If not: screw em)
+			job.Weight *= 1000
+		}
+
+		if job.Distance == 0 {
+			job.Distance = 100 // If the user did not provide distance use 100km as a default
+		}
+
+		if err = addJobToGame(game, job); err != nil {
+			apiGenericError(w, http.StatusInternalServerError, errors.Wrap(err, "Unable to add job"))
+			return
 		}
 	}
-
-	jobID := "_nameless." + strconv.FormatInt(time.Now().Unix(), 16)
-	exTime := game.BlocksByClass("economy")[0].(*sii.Economy).GameTime + 300 // 300min = 5h
-	j := &sii.JobOfferData{
-		// User requested job data
-		Target:             strings.TrimPrefix(job.TargetReference, "company.volatile."),
-		ExpirationTime:     &exTime,
-		Urgency:            job.Urgency,
-		Cargo:              sii.Ptr{Target: job.CargoReference},
-		UnitsCount:         int64(job.Weight / cargo.Mass),
-		ShortestDistanceKM: job.Distance,
-
-		// Some static data
-		FillRatio: 1, // Dunno but other jobs have it at 1, so keep for now
-
-		// Dunno where this data comes from, it works without it and gets own ones
-		TrailerPlace: []sii.Placement{},
-
-		// Too lazy to implement, just steal it too
-		CompanyTruck:      sii.Ptr{Target: cTruck},
-		TrailerVariant:    sii.Ptr{Target: cTV},
-		TrailerDefinition: sii.Ptr{Target: cTD},
-	}
-	j.Init("", jobID)
-
-	// Add the new job to the game
-	game.Entries = append(game.Entries, j)
-	company.JobOffer = append([]sii.Ptr{{Target: j.Name()}}, company.JobOffer...)
 
 	// Write the save-game
 	if err = storeSave(vars["profileID"], storeSaveFolder, game, info); err != nil {
