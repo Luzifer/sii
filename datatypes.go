@@ -81,6 +81,8 @@ type Ptr struct {
 	unit   *Unit
 }
 
+func (p Ptr) IsNull() bool { return p.Target == "null" || p.Target == "" }
+
 func (p Ptr) MarshalSII() []byte { return []byte(p.Target) }
 
 func (p Ptr) Resolve() Block {

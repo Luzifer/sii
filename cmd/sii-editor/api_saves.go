@@ -7,10 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Luzifer/go_helpers/v2/str"
-	"github.com/Luzifer/sii"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
+
+	"github.com/Luzifer/go_helpers/v2/str"
+	"github.com/Luzifer/sii"
 )
 
 const (
@@ -79,7 +80,7 @@ func handleAddJob(w http.ResponseWriter, r *http.Request) {
 
 	for _, jp := range company.JobOffer {
 		j := jp.Resolve().(*sii.JobOfferData)
-		if j.CompanyTruck.Target == "null" || j.TrailerVariant.Target == "null" || j.TrailerDefinition.Target == "null" || len(j.TrailerPlace) < 1 {
+		if j.CompanyTruck.IsNull() || j.TrailerVariant.IsNull() || j.TrailerDefinition.IsNull() || len(j.TrailerPlace) < 1 {
 			continue
 		}
 		cTruck, cTV, cTD = j.CompanyTruck.Target, j.TrailerVariant.Target, j.TrailerDefinition.Target
@@ -87,11 +88,11 @@ func handleAddJob(w http.ResponseWriter, r *http.Request) {
 		break
 	}
 
-	if cTP == nil {
+	if cTP == nil || len(cTP) < 1 {
 		// The company did not have any valid job offers to steal from, lets search globally
 		for _, jb := range game.BlocksByClass("job_offer_data") {
 			j := jb.(*sii.JobOfferData)
-			if j.CompanyTruck.Target == "null" || j.TrailerVariant.Target == "null" || j.TrailerDefinition.Target == "null" || len(j.TrailerPlace) < 1 {
+			if j.CompanyTruck.IsNull() || j.TrailerVariant.IsNull() || j.TrailerDefinition.IsNull() || len(j.TrailerPlace) < 1 {
 				continue
 			}
 			cTruck, cTV, cTD = j.CompanyTruck.Target, j.TrailerVariant.Target, j.TrailerDefinition.Target
