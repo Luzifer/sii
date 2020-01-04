@@ -7,9 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Luzifer/sii"
 	"github.com/pkg/errors"
+
+	"github.com/Luzifer/sii"
 )
+
+const jobExpiryPerSegment = 4 * 24 * 60 // 4d * 24h * 60m
 
 const (
 	fixAll         = "all"
@@ -194,7 +197,7 @@ func addJobToGame(game *sii.Unit, job commSaveJob, routePartID int) error {
 		strconv.FormatInt(time.Now().Unix(), 16),
 		strconv.FormatInt(int64(routePartID), 16),
 	}, ".")
-	exTime := game.BlocksByClass("economy")[0].(*sii.Economy).GameTime + 300 // 300min = 5h
+	exTime := game.BlocksByClass("economy")[0].(*sii.Economy).GameTime + jobExpiryPerSegment*int64(routePartID+1)
 	j := &sii.JobOfferData{
 		// User requested job data
 		Target:             strings.TrimPrefix(job.TargetReference, "company.volatile."),
