@@ -73,30 +73,25 @@ func handleAddJob(w http.ResponseWriter, r *http.Request) {
 	cargo := baseGameUnit.BlockByName(job.CargoReference).(*sii.CargoData)
 
 	// Get trailer / truck from other jobs
-	var (
-		cTruck, cTV, cTD string
-		cTP              []sii.Placement
-	)
+	var cTruck, cTV, cTD string
 
 	for _, jp := range company.JobOffer {
 		j := jp.Resolve().(*sii.JobOfferData)
-		if j.CompanyTruck.IsNull() || j.TrailerVariant.IsNull() || j.TrailerDefinition.IsNull() || len(j.TrailerPlace) < 1 {
+		if j.CompanyTruck.IsNull() || j.TrailerVariant.IsNull() || j.TrailerDefinition.IsNull() {
 			continue
 		}
 		cTruck, cTV, cTD = j.CompanyTruck.Target, j.TrailerVariant.Target, j.TrailerDefinition.Target
-		cTP = j.TrailerPlace
 		break
 	}
 
-	if cTP == nil || len(cTP) < 1 {
+	if cTruck == "" || cTV == "" || cTD == "" {
 		// The company did not have any valid job offers to steal from, lets search globally
 		for _, jb := range game.BlocksByClass("job_offer_data") {
 			j := jb.(*sii.JobOfferData)
-			if j.CompanyTruck.IsNull() || j.TrailerVariant.IsNull() || j.TrailerDefinition.IsNull() || len(j.TrailerPlace) < 1 {
+			if j.CompanyTruck.IsNull() || j.TrailerVariant.IsNull() || j.TrailerDefinition.IsNull() {
 				continue
 			}
 			cTruck, cTV, cTD = j.CompanyTruck.Target, j.TrailerVariant.Target, j.TrailerDefinition.Target
-			cTP = j.TrailerPlace
 			break
 		}
 	}
@@ -115,8 +110,8 @@ func handleAddJob(w http.ResponseWriter, r *http.Request) {
 		// Some static data
 		FillRatio: 1, // Dunno but other jobs have it at 1, so keep for now
 
-		// Dunno where this data comes from, steal it from previous first job
-		TrailerPlace: cTP,
+		// Dunno where this data comes from, it works without it and gets own ones
+		TrailerPlace: []sii.Placement{},
 
 		// Too lazy to implement, just steal it too
 		CompanyTruck:      sii.Ptr{Target: cTruck},

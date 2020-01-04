@@ -3,6 +3,7 @@ package sii
 import (
 	"bytes"
 	"regexp"
+	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -81,7 +82,7 @@ type Ptr struct {
 	unit   *Unit
 }
 
-func (p Ptr) IsNull() bool { return p.Target == "null" || p.Target == "" }
+func (p Ptr) IsNull() bool { return p.Target == "null" || strings.TrimSpace(p.Target) == "" }
 
 func (p Ptr) MarshalSII() []byte { return []byte(p.Target) }
 
