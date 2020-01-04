@@ -237,9 +237,9 @@ window.app = new Vue({
           this.cargo = resp.data
         })
         .catch(err => {
-          this.showToast('Uhoh…', 'Could not load cargo defintion', 'danger'
-            console.error(err)
-          })
+          this.showToast('Uhoh…', 'Could not load cargo defintion', 'danger')
+          console.error(err)
+        })
     },
 
     loadCompanies() {
@@ -321,7 +321,7 @@ window.app = new Vue({
         return
       }
 
-      let newRoute = []
+      const newRoute = []
       for (const i in this.plannedRoute) {
         if (parseInt(i) !== idx) {
           newRoute.push(this.plannedRoute[i])
