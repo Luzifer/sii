@@ -182,6 +182,13 @@ func addJobToGame(game *sii.Unit, job commSaveJob) error {
 		return errors.New("Was not able to find suitable trailer definition")
 	}
 
+	cargoCount := int64(job.Weight / cargo.Mass)
+	if cargoCount < 1 {
+		// Ensure cargo is transported (can happen if only small weight is
+		// requested and one unit weighs more than requested cargo)
+		cargoCount = 1
+	}
+
 	jobID := "_nameless." + strconv.FormatInt(time.Now().Unix(), 16)
 	exTime := game.BlocksByClass("economy")[0].(*sii.Economy).GameTime + 300 // 300min = 5h
 	j := &sii.JobOfferData{
@@ -190,7 +197,7 @@ func addJobToGame(game *sii.Unit, job commSaveJob) error {
 		ExpirationTime:     &exTime,
 		Urgency:            job.Urgency,
 		Cargo:              sii.Ptr{Target: job.CargoReference},
-		UnitsCount:         int64(job.Weight / cargo.Mass),
+		UnitsCount:         cargoCount,
 		ShortestDistanceKM: job.Distance,
 
 		// Some static data
