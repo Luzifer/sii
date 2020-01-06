@@ -209,7 +209,7 @@ window.app = new Vue({
       // Reset job
       this.newJob = {
         origin_reference: this.newJob.target_reference, // Automatically set origin to last target for route creation
-        weight: 10
+        weight: 10,
       }
     },
 
@@ -219,6 +219,7 @@ window.app = new Vue({
         .then(() => {
           this.showToast('Success', 'Route created', 'success')
           this.plannedRoute = []
+          this.newJob = { weight: 10 }
         })
         .catch(err => {
           this.showToast('Uhoh…', 'Could not add route', 'danger')
